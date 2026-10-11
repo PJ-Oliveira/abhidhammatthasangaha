@@ -1,0 +1,208 @@
+// src/i18n.ts
+import type { UiLanguage } from './types/models';
+
+export const translations = {
+  pt: {
+    // App & Header
+    'app.title': 'Abhidhammatthasaṅgaha',
+    'app.subtitle': 'Compêndio das Matérias do Abhidhamma',
+    'header.menu': 'Menu de Capítulos',
+    'header.export': '📥 Exportar',
+    'header.exportAria': 'Exportar EPUB ou PDF',
+    'header.uiLanguage': 'Idioma da Interface',
+    'nav.prev': '← Anterior',
+    'nav.next': 'Próximo →',
+    'nav.chapterOf': '/',
+    'search.placeholder': 'Pesquisar em Pāli, Português, Inglês, Espanhol...',
+    'tabs.reader': '📖 Leitor',
+    'tabs.dictionary': '📚 Dicionário',
+
+    // Dicionário
+    'dict.searchPlaceholder': 'Buscar termo em Pāli...',
+    'dict.tapWord': 'Toque em uma palavra no texto para pesquisar no léxico do Abhidhamma.',
+    'dict.grammar': 'Gramática',
+    'dict.root': 'Raiz / Construção',
+    'dict.meaning': 'Significado',
+    'dict.openFull': 'Abrir no Dicionário Completo',
+    'dict.expand': '⤢ Expandir',
+    'dict.collapse': '⤡ Recolher',
+    'dict.notFound': 'Definição não encontrada no dicionário offline.',
+    'dict.quickTerms': 'Termos Frequentes',
+
+    // Modal de Exportação
+    'export.title': 'Exportar Obra',
+    'export.subtitle': 'Abhidhammatthasaṅgaha — Edição Completa',
+    'export.secFormat': '1. Formato de Exportação',
+    'export.epub': '📚 EPUB (Livro Digital)',
+    'export.pdf': '📄 PDF (Impressão / A4)',
+    'export.secMode': '2. Modo de Apresentação',
+    'export.bilingual': '🌐 Bilíngue (Pāli + Tradução)',
+    'export.monolingual': '📖 Monolíngue',
+    'export.secLang': '3. Idioma(s)',
+    'export.secScope': '4. Extensão da Obra',
+    'export.scopeAll': '📜 Tratado Completo (9 Capítulos)',
+    'export.scopeCurrent': '📑 Apenas Capítulo Atual',
+    'export.featDict': '✓ Dicionário completo de Pāli no final do tratado',
+    'export.featLinks': '✓ Palavras em Pāli com links clicáveis para o glossário',
+    'export.featNoBreak': '✓ Regra estrita: palavras em Pāli protegidas de quebra de linha',
+    'export.featToc': '✓ Índice navegável de capítulos (TOC) incluído',
+    'export.featType': '✓ Tipografia serigrafada em alta resolução (tamanho ≥ 13pt)',
+    'export.featPages': '✓ Numeração de páginas e estruturação formal de livro',
+    'export.btnEpub': 'Gerar e Baixar EPUB',
+    'export.btnPdf': 'Gerar e Visualizar / Imprimir PDF',
+    'export.compiling': 'Compilando Documento...',
+    'export.progressInit': 'Iniciando exportação...',
+    'export.progressSentences': 'Compilando capítulos e sentenças...',
+    'export.progressZip': 'Empacotando estrutura EPUB 3...',
+    'export.progressPdf': 'Gerando documento formatado em PDF...',
+    'export.progressDone': 'Download concluído!',
+    'export.progressError': 'Erro ao exportar. Tente novamente.',
+
+    // Sidebar & Links
+    'sidebar.title': 'Abhidhammatthasaṅgaha',
+    'sidebar.part': 'Parte',
+    'sidebar.exportBtn': '📥 Exportar Obra (EPUB / PDF)',
+    'link.copied': 'Link do parágrafo copiado para a área de transferência!',
+    'link.copyAria': 'Copiar link direto para este parágrafo',
+    'loading.chapter': 'Carregando capítulo...',
+  },
+
+  en: {
+    // App & Header
+    'app.title': 'Abhidhammatthasaṅgaha',
+    'app.subtitle': 'A Comprehensive Manual of Abhidhamma',
+    'header.menu': 'Chapter Menu',
+    'header.export': '📥 Export',
+    'header.exportAria': 'Export EPUB or PDF',
+    'header.uiLanguage': 'UI Language',
+    'nav.prev': '← Previous',
+    'nav.next': 'Next →',
+    'nav.chapterOf': '/',
+    'search.placeholder': 'Search in Pāli, English, Portuguese, Spanish...',
+    'tabs.reader': '📖 Reader',
+    'tabs.dictionary': '📚 Dictionary',
+
+    // Dicionário
+    'dict.searchPlaceholder': 'Search Pāli term...',
+    'dict.tapWord': 'Tap a word in the text to lookup in the Abhidhamma lexicon.',
+    'dict.grammar': 'Grammar',
+    'dict.root': 'Root / Construction',
+    'dict.meaning': 'Meaning',
+    'dict.openFull': 'Open in Full Dictionary',
+    'dict.expand': '⤢ Expand',
+    'dict.collapse': '⤡ Collapse',
+    'dict.notFound': 'Definition not found in offline dictionary.',
+    'dict.quickTerms': 'Frequent Terms',
+
+    // Modal de Exportação
+    'export.title': 'Export Treatise',
+    'export.subtitle': 'Abhidhammatthasaṅgaha — Complete Edition',
+    'export.secFormat': '1. Export Format',
+    'export.epub': '📚 EPUB (Digital Book)',
+    'export.pdf': '📄 PDF (Print / A4)',
+    'export.secMode': '2. Presentation Mode',
+    'export.bilingual': '🌐 Bilingual (Pāli + Translation)',
+    'export.monolingual': '📖 Monolingual',
+    'export.secLang': '3. Language(s)',
+    'export.secScope': '4. Work Scope',
+    'export.scopeAll': '📜 Full Treatise (9 Chapters)',
+    'export.scopeCurrent': '📑 Current Chapter Only',
+    'export.featDict': '✓ Complete Pāli dictionary at the end of treatise',
+    'export.featLinks': '✓ Pāli words with active hyperlinks to the glossary',
+    'export.featNoBreak': '✓ Strict rule: Pāli words protected against line-breaks',
+    'export.featToc': '✓ Navigable Table of Contents (TOC) included',
+    'export.featType': '✓ High-resolution serif typography (font size ≥ 13pt)',
+    'export.featPages': '✓ Page numbering and formal book structuring',
+    'export.btnEpub': 'Generate & Download EPUB',
+    'export.btnPdf': 'Generate & View / Print PDF',
+    'export.compiling': 'Compiling Document...',
+    'export.progressInit': 'Starting export...',
+    'export.progressSentences': 'Compiling chapters and sentences...',
+    'export.progressZip': 'Packaging EPUB 3 structure...',
+    'export.progressPdf': 'Generating formatted PDF document...',
+    'export.progressDone': 'Download completed!',
+    'export.progressError': 'Export failed. Please try again.',
+
+    // Sidebar & Links
+    'sidebar.title': 'Abhidhammatthasaṅgaha',
+    'sidebar.part': 'Part',
+    'sidebar.exportBtn': '📥 Export Treatise (EPUB / PDF)',
+    'link.copied': 'Paragraph link copied to clipboard!',
+    'link.copyAria': 'Copy direct link to this paragraph',
+    'loading.chapter': 'Loading chapter...',
+  },
+
+  es: {
+    // App & Header
+    'app.title': 'Abhidhammatthasaṅgaha',
+    'app.subtitle': 'Compendio de las Materias del Abhidhamma',
+    'header.menu': 'Menú de Capítulos',
+    'header.export': '📥 Exportar',
+    'header.exportAria': 'Exportar EPUB o PDF',
+    'header.uiLanguage': 'Idioma de la Interfaz',
+    'nav.prev': '← Anterior',
+    'nav.next': 'Siguiente →',
+    'nav.chapterOf': '/',
+    'search.placeholder': 'Buscar en Pāli, Español, Inglés, Portugués...',
+    'tabs.reader': '📖 Lector',
+    'tabs.dictionary': '📚 Diccionario',
+
+    // Dicionário
+    'dict.searchPlaceholder': 'Buscar término en Pāli...',
+    'dict.tapWord': 'Toca una palabra en el texto para buscar en el léxico del Abhidhamma.',
+    'dict.grammar': 'Gramática',
+    'dict.root': 'Raíz / Construcción',
+    'dict.meaning': 'Significado',
+    'dict.openFull': 'Abrir en Diccionario Completo',
+    'dict.expand': '⤢ Expandir',
+    'dict.collapse': '⤡ Contraer',
+    'dict.notFound': 'Definición no encontrada en el diccionario offline.',
+    'dict.quickTerms': 'Términos Frecuentes',
+
+    // Modal de Exportação
+    'export.title': 'Exportar Obra',
+    'export.subtitle': 'Abhidhammatthasaṅgaha — Edición Completa',
+    'export.secFormat': '1. Formato de Exportación',
+    'export.epub': '📚 EPUB (Libro Digital)',
+    'export.pdf': '📄 PDF (Impresión / A4)',
+    'export.secMode': '2. Modo de Presentación',
+    'export.bilingual': '🌐 Bilingüe (Pāli + Traducción)',
+    'export.monolingual': '📖 Monolingüe',
+    'export.secLang': '3. Idioma(s)',
+    'export.secScope': '4. Extensión de la Obra',
+    'export.scopeAll': '📜 Tratado Completo (9 Capítulos)',
+    'export.scopeCurrent': '📑 Sólo Capítulo Actual',
+    'export.featDict': '✓ Diccionario completo de Pāli al final del tratado',
+    'export.featLinks': '✓ Palabras en Pāli con enlaces activos al glosario',
+    'export.featNoBreak': '✓ Regla estricta: palabras en Pāli protegidas contra salto de línea',
+    'export.featToc': '✓ Índice navegable de capítulos (TOC) incluido',
+    'export.featType': '✓ Tipografía serigrafiada de alta resolución (tamaño ≥ 13pt)',
+    'export.featPages': '✓ Numeración de páginas y estructuración formal de libro',
+    'export.btnEpub': 'Generar y Descargar EPUB',
+    'export.btnPdf': 'Generar y Ver / Imprimir PDF',
+    'export.compiling': 'Compilando Documento...',
+    'export.progressInit': 'Iniciando exportación...',
+    'export.progressSentences': 'Compilando capítulos y oraciones...',
+    'export.progressZip': 'Empaquetando estructura EPUB 3...',
+    'export.progressPdf': 'Generando documento formateado en PDF...',
+    'export.progressDone': '¡Descarga completada!',
+    'export.progressError': 'Error al exportar. Inténtalo de nuevo.',
+
+    // Sidebar & Links
+    'sidebar.title': 'Abhidhammatthasaṅgaha',
+    'sidebar.part': 'Parte',
+    'sidebar.exportBtn': '📥 Exportar Obra (EPUB / PDF)',
+    'link.copied': '¡Enlace del párrafo copiado al portapapeles!',
+    'link.copyAria': 'Copiar enlace directo a este párrafo',
+    'loading.chapter': 'Cargando capítulo...',
+  },
+} as const;
+
+export type TranslationKey = keyof typeof translations['pt'];
+
+export function t(key: TranslationKey, lang: UiLanguage = 'pt'): string {
+  const dict = translations[lang] || translations.pt;
+  return dict[key] || translations.pt[key] || key;
+}
+
+export default { t, translations };

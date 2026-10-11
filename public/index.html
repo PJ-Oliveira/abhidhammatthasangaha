@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <!-- viewport-fit=cover: usa a tela inteira em iPhones com notch (os recuos vêm do CSS abaixo) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no" />
+    <meta name="theme-color" content="#FAF5E4" />
+    <title>%WEB_TITLE%</title>
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background-color: #FAF5E4;
+      }
+      /* Barra de endereço dinâmica dos celulares: 100dvh evita rodapé cortado. */
+      @supports (height: 100dvh) {
+        html,
+        body {
+          height: 100dvh;
+        }
+      }
+      body {
+        overflow: hidden;
+        box-sizing: border-box;
+        /* Recuos seguros (notch / barra home) em celulares e iPads. */
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+          env(safe-area-inset-left);
+        /* Não deixa o iOS inflar a fonte ao girar a tela. */
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        /* Nunca "sintetizar" negrito/itálico: o app usa os arquivos reais da fonte,
+           e a síntese deformaria os diacríticos do Pali (ṃ ṅ ṭ ḍ ṇ ḷ ā ī ū). */
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overscroll-behavior: none;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <div id="root"></div>
+  </body>
+</html>
