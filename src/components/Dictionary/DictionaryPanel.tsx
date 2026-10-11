@@ -188,11 +188,7 @@ export const DictionaryPanel: React.FC = () => {
 
       {/* Suggested Quick Terms */}
       <View style={styles.quickTermsContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.quickTermsList}
-        >
+        <View style={styles.quickTermsList}>
           {QUICK_TERMS.map((term) => (
             <TouchableOpacity
               key={term}
@@ -202,7 +198,7 @@ export const DictionaryPanel: React.FC = () => {
               <Text style={styles.quickTermText}>{term}</Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
       </View>
 
       {/* Results List */}
@@ -259,18 +255,21 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   quickTermsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: 16,
-    gap: 8,
+    gap: 6,
   },
   quickTermChip: {
     backgroundColor: '#E8DCC8',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
     borderRadius: 14,
+    marginBottom: 2,
   },
   quickTermText: {
     color: '#4B2E2A',
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '500',
   },
   listContent: {
