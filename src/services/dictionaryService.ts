@@ -69,10 +69,33 @@ function getCandidateStems(word: string): string[] {
     candidates.push(norm);
   }
 
-  // Desinências nominais e verbais comuns em Pāli emparelhadas com base
+  // Desinências nominais, verbais e de sandhi canônicas em Pāli
   const endings: [string, string][] = [
+    // Sandhis frequentes nos tratados do Abhidhamma
+    ['tīti', 'ti'],
+    ['tīti', ''],
+    ['ñceti', 'a'],
+    ['ñceti', ''],
+    ['ñca', 'a'],
+    ['ñca', ''],
+    ['cāti', ''],
+    ['tveva', ''],
+    ['totyattho', 'to'],
+    ['totyattho', 'a'],
+    ['mpī', 'a'],
+    ['mpī', ''],
+    ['mpi', 'a'],
+    ['mpi', ''],
+    ['tassa', 'ta'],
+    ['tassa', ''],
+    ['māna', 'ati'],
+    ['mānā', 'ati'],
+    ['mānaṃ', 'ati'],
+    // Desinências de caso / número
     ['assa', 'a'],   // Genitivo/dativo sg
-    ['ānaṃ', 'a'],   // Genitivo pl
+    ['ānaṃ', 'a'],   // Genitivo pl (-a)
+    ['ānaṃ', 'i'],   // Genitivo pl (-i)
+    ['ānaṃ', 'u'],   // Genitivo pl (-u)
     ['anam', 'a'],
     ['ena', 'a'],    // Instrumental sg
     ['ehi', 'a'],    // Instrumental/ablativo pl
@@ -82,13 +105,29 @@ function getCandidateStems(word: string): string[] {
     ['aya', 'ā'],
     ['aṃ', 'a'],     // Acusativo sg / nominativo nt
     ['am', 'a'],
+    ['esu', 'a'],    // Locativo pl
+    ['esu', ''],
+    ['āni', 'a'],    // Nom./acc. pl nt
+    ['āni', ''],
     ['o', 'a'],      // Nominativo sg masc
     ['e', 'a'],      // Locativo sg
     ['ā', 'a'],      // Nominativo pl / ablativo
-    ['ī', 'i'],      // Sandhi
+    ['ī', 'i'],      // Sandhi / fem
     ['ū', 'u'],      // Sandhi
+    ['to', 'a'],     // Ablativo / adverbial
+    ['to', ''],
+    // Desinências verbais
+    ['anti', 'ati'], // 3ª pl -> 3ª sg
+    ['anti', 'a'],
     ['nti', ''],     // 3a pessoa pl
     ['ti', ''],      // 3a pessoa sg ou aspa 'iti'
+    ['eyya', 'ati'], // Optativo
+    ['eyya', 'eti'],
+    ['ituṃ', 'eti'], // Infinitivo
+    ['ituṃ', 'ā'],
+    ['tvā', 'ti'],   // Absolutivo
+    ['tvā', 'ati'],
+    ['tvā', 'eti'],
     ['pi', ''],      // api
     ['ca', ''],      // ca
     ['eva', ''],     // eva

@@ -57,7 +57,6 @@ export const ChapterSidebar: React.FC = () => {
             <View key={part.number} style={styles.partSection}>
               {/* Part header */}
               <View style={styles.partHeader}>
-                <Text style={styles.partPali}>{part.pali}</Text>
                 <Text style={styles.partTitle}>
                   {t('sidebar.part', uiLanguage)} {part.number} — {part.titles[uiLanguage] || part.titles[translationLang]}
                 </Text>
@@ -189,9 +188,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   partTitle: {
-    fontSize: 11,
-    color: '#9A7A5A',
-    marginTop: 2,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#D4A574',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   chapterRow: {
     flexDirection: 'row',

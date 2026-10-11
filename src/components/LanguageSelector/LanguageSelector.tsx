@@ -59,15 +59,16 @@ export const LanguageSelector: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     flexWrap: 'wrap',
     justifyContent: 'center',
+    maxWidth: '100%',
   },
   btn: {
-    minHeight: 36,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 18,
+    minHeight: 32,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
     justifyContent: 'center',
     backgroundColor: '#E8DCC8',
   },
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4B2E2A',
   },
   label: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#4B2E2A',
   },
   labelActive: {

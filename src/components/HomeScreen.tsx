@@ -183,45 +183,84 @@ const HomeScreen = () => {
               </Text>
             </View>
           </View>
-          <View
-            style={[
-              styles.headerRight,
-              layout.headerStacked && styles.headerRightStacked,
-            ]}
-          >
-            {/* Seletor de Idioma da Interface (PT | EN | ES) */}
-            <View style={styles.uiLangSwitcher}>
-              {(['pt', 'en', 'es'] as UiLanguage[]).map((langCode) => {
-                const active = uiLanguage === langCode;
-                return (
-                  <TouchableOpacity
-                    key={langCode}
-                    style={[styles.uiLangBtn, active && styles.uiLangBtnActive]}
-                    onPress={() => dispatch(setUiLanguage(langCode))}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Interface ${langCode.toUpperCase()}`}
-                  >
-                    <Text style={[styles.uiLangBtnText, active && styles.uiLangBtnTextActive]}>
-                      {langCode.toUpperCase()}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+          {layout.headerStacked ? (
+            <View style={styles.headerStackedControls}>
+              <View style={styles.headerActionsRow}>
+                {/* Seletor de Idioma da Interface (PT | EN | ES) */}
+                <View style={styles.uiLangSwitcher}>
+                  {(['pt', 'en', 'es'] as UiLanguage[]).map((langCode) => {
+                    const active = uiLanguage === langCode;
+                    return (
+                      <TouchableOpacity
+                        key={langCode}
+                        style={[styles.uiLangBtn, active && styles.uiLangBtnActive]}
+                        onPress={() => dispatch(setUiLanguage(langCode))}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Interface ${langCode.toUpperCase()}`}
+                      >
+                        <Text style={[styles.uiLangBtnText, active && styles.uiLangBtnTextActive]}>
+                          {langCode.toUpperCase()}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
 
-            <TouchableOpacity
-              style={styles.exportHeaderBtn}
-              onPress={() => dispatch(setExportModalOpen(true))}
-              accessibilityRole="button"
-              accessibilityLabel={t('header.exportAria', uiLanguage)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.exportHeaderBtnText}>{t('header.export', uiLanguage)}</Text>
-            </TouchableOpacity>
-            <View style={styles.languageSelectorContainer}>
-              <LanguageSelector />
+                {/* Botão de Exportação */}
+                <TouchableOpacity
+                  style={styles.exportHeaderBtn}
+                  onPress={() => dispatch(setExportModalOpen(true))}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('header.exportAria', uiLanguage)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.exportHeaderBtnText}>{t('header.export', uiLanguage)}</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Seletor de Idiomas do Leitor (Pāli, English, Português, Español) */}
+              <View style={styles.languageSelectorRow}>
+                <LanguageSelector />
+              </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.headerRight}>
+              {/* Seletor de Idioma da Interface (PT | EN | ES) */}
+              <View style={styles.uiLangSwitcher}>
+                {(['pt', 'en', 'es'] as UiLanguage[]).map((langCode) => {
+                  const active = uiLanguage === langCode;
+                  return (
+                    <TouchableOpacity
+                      key={langCode}
+                      style={[styles.uiLangBtn, active && styles.uiLangBtnActive]}
+                      onPress={() => dispatch(setUiLanguage(langCode))}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Interface ${langCode.toUpperCase()}`}
+                    >
+                      <Text style={[styles.uiLangBtnText, active && styles.uiLangBtnTextActive]}>
+                        {langCode.toUpperCase()}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Botão de Exportação */}
+              <TouchableOpacity
+                style={styles.exportHeaderBtn}
+                onPress={() => dispatch(setExportModalOpen(true))}
+                accessibilityRole="button"
+                accessibilityLabel={t('header.exportAria', uiLanguage)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.exportHeaderBtnText}>{t('header.export', uiLanguage)}</Text>
+              </TouchableOpacity>
+
+              <View style={styles.languageSelectorContainer}>
+                <LanguageSelector />
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Content Area */}
@@ -278,11 +317,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF5E4',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    overflow: 'hidden',
   },
   frame: {
     flex: 1,
     width: '100%',
     alignSelf: 'center',
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
@@ -313,10 +354,21 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     gap: 8,
   },
-  headerRightStacked: {
+  headerStackedControls: {
     width: '100%',
     marginTop: 10,
+    gap: 8,
+  },
+  headerActionsRow: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  languageSelectorRow: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   uiLangSwitcher: {
     flexDirection: 'row',
