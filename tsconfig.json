@@ -9,6 +9,7 @@
     "allowJs": false,
     "jsx": "react-native",
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -18,6 +19,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
+    "types": ["jest"],
     "typeRoots": [
       "./node_modules/@types",
       "./src/types"
