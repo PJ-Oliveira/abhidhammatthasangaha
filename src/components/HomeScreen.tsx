@@ -17,10 +17,12 @@ import { loadChapter } from '../data/chapters/chapterLoader';
 import { buildSearchIndex } from '../services/textSearch';
 import { useLayout } from '../theme/layout';
 import { getCurrentRoute, updateBrowserRoute, chapterIdToNumber } from '../utils/urlRouter';
+import { AnkiDeck } from './AnkiDeck/AnkiDeck';
+import { CompendiumMatrix } from './Matrix/CompendiumMatrix';
 import { t } from '../i18n';
 import type { Segment, UiLanguage } from '../types/models';
 
-type Tab = 'reader' | 'dictionary';
+type Tab = 'reader' | 'anki' | 'matrix' | 'dictionary';
 
 const HomeScreen = () => {
   const dispatch = useAppDispatch();
@@ -266,12 +268,52 @@ const HomeScreen = () => {
         {/* Content Area */}
         {layout.isSplit ? (
           // Split view para tablet / iPad / notebook / desktop
-          <View style={styles.splitContainer}>
-            <View style={styles.splitMain}>{renderReader()}</View>
-            <View style={[styles.splitSide, { width: layout.sidePanelWidth }]}>{renderDictionary()}</View>
+          <View style={{ flex: 1 }}>
+            {/* Top Navigation Tabs for Desktop / Tablet */}
+            <View style={[styles.tabBar, { paddingHorizontal: padX, marginBottom: 8 }]}>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'reader' && styles.tabActive]}
+                onPress={() => setActiveTab('reader')}
+              >
+                <Text style={[styles.tabText, activeTab === 'reader' && styles.tabTextActive]}>
+                  {t('tabs.reader', uiLanguage)}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'anki' && styles.tabActive]}
+                onPress={() => setActiveTab('anki')}
+              >
+                <Text style={[styles.tabText, activeTab === 'anki' && styles.tabTextActive]}>
+                  {t('tabs.anki', uiLanguage)}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'matrix' && styles.tabActive]}
+                onPress={() => setActiveTab('matrix')}
+              >
+                <Text style={[styles.tabText, activeTab === 'matrix' && styles.tabTextActive]}>
+                  {t('tabs.matrix', uiLanguage)}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.splitContainer}>
+              <View style={styles.splitMain}>
+                {activeTab === 'anki' ? (
+                  <AnkiDeck />
+                ) : activeTab === 'matrix' ? (
+                  <CompendiumMatrix />
+                ) : (
+                  renderReader()
+                )}
+              </View>
+              <View style={[styles.splitSide, { width: layout.sidePanelWidth }]}>
+                {renderDictionary()}
+              </View>
+            </View>
           </View>
         ) : (
-          // Abas para celular
+          // Abas para celular com rolagem horizontal fluida
           <>
             <View style={[styles.tabBar, { paddingHorizontal: padX }]}>
               <TouchableOpacity
@@ -280,6 +322,22 @@ const HomeScreen = () => {
               >
                 <Text style={[styles.tabText, activeTab === 'reader' && styles.tabTextActive]}>
                   {t('tabs.reader', uiLanguage)}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'anki' && styles.tabActive]}
+                onPress={() => setActiveTab('anki')}
+              >
+                <Text style={[styles.tabText, activeTab === 'anki' && styles.tabTextActive]}>
+                  {t('tabs.anki', uiLanguage)}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'matrix' && styles.tabActive]}
+                onPress={() => setActiveTab('matrix')}
+              >
+                <Text style={[styles.tabText, activeTab === 'matrix' && styles.tabTextActive]}>
+                  {t('tabs.matrix', uiLanguage)}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -292,7 +350,10 @@ const HomeScreen = () => {
               </TouchableOpacity>
             </View>
 
-            {activeTab === 'reader' ? renderReader() : renderDictionary()}
+            {activeTab === 'reader' && renderReader()}
+            {activeTab === 'anki' && <AnkiDeck />}
+            {activeTab === 'matrix' && <CompendiumMatrix />}
+            {activeTab === 'dictionary' && renderDictionary()}
           </>
         )}
       </View>
@@ -428,19 +489,22 @@ const styles = StyleSheet.create({
   titleTranslation: { fontSize: 12, color: '#8B7355', fontStyle: 'italic', marginTop: 1 },
   tabBar: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingVertical: 6,
-    gap: 8,
+    gap: 6,
   },
   tab: {
     flex: 1,
-    minHeight: 44,
+    minWidth: 70,
+    minHeight: 42,
+    paddingHorizontal: 6,
     justifyContent: 'center',
     borderRadius: 8,
     backgroundColor: '#E8DCC8',
     alignItems: 'center',
   },
   tabActive: { backgroundColor: '#4B2E2A' },
-  tabText: { fontSize: 14, color: '#4B2E2A', fontWeight: '500' },
+  tabText: { fontSize: 13, color: '#4B2E2A', fontWeight: '500', textAlign: 'center' },
   tabTextActive: { color: '#FAF5E4', fontWeight: '700' },
   content: { flex: 1, minHeight: 0 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },

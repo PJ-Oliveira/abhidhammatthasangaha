@@ -27,11 +27,13 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
   const dictionaryWord = useAppSelector((s) => s.reading.dictionaryWord);
   const languages = useAppSelector((s) => s.reading.languages);
   const uiLanguage = useAppSelector((s) => s.settings.uiLanguage);
-  const translationLang = languages.includes('pt')
-    ? 'pt'
-    : languages.includes('es')
-    ? 'es'
-    : 'en';
+  const translationLang =
+    uiLanguage ||
+    (languages.includes('pt')
+      ? 'pt'
+      : languages.includes('es')
+      ? 'es'
+      : 'en');
 
   const [isExpanded, setIsExpanded] = useState(false);
 

@@ -25,12 +25,12 @@ export const DictionaryPanel: React.FC = () => {
   const dictionaryWord = useAppSelector((s) => s.reading.dictionaryWord);
   const uiLanguage = useAppSelector((s) => s.settings.uiLanguage);
 
-  // Active translation language: non-pali language if a single one is selected
+  // Active translation language follows uiLanguage (PT | EN | ES) so it is always consistent with the selected UI language
   const nonPaliLanguages = (languages || []).filter(
     (lang): lang is 'en' | 'pt' | 'es' => lang === 'en' || lang === 'pt' || lang === 'es'
   );
-  const activeLanguage = nonPaliLanguages.length === 1 ? nonPaliLanguages[0] : null;
-  const lang = (languages.find((l) => l !== 'pali') || 'en') as 'en' | 'pt' | 'es';
+  const activeLanguage: 'en' | 'pt' | 'es' | null =
+    uiLanguage || (nonPaliLanguages.length === 1 ? nonPaliLanguages[0] : null);
 
   const executeSearch = useCallback((searchTerm: string) => {
     const trimmed = cleanPaliToken(searchTerm).trim();

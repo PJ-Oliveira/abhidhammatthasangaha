@@ -15,6 +15,8 @@ export const translations = {
     'nav.chapterOf': '/',
     'search.placeholder': 'Pesquisar em Pāli, Português, Inglês, Espanhol...',
     'tabs.reader': '📖 Leitor',
+    'tabs.anki': '🎴 Anki SRS',
+    'tabs.matrix': '📊 Matrizes',
     'tabs.dictionary': '📚 Dicionário',
 
     // Dicionário
@@ -80,6 +82,8 @@ export const translations = {
     'nav.chapterOf': '/',
     'search.placeholder': 'Search in Pāli, English, Portuguese, Spanish...',
     'tabs.reader': '📖 Reader',
+    'tabs.anki': '🎴 Anki SRS',
+    'tabs.matrix': '📊 Matrices',
     'tabs.dictionary': '📚 Dictionary',
 
     // Dicionário
@@ -145,6 +149,8 @@ export const translations = {
     'nav.chapterOf': '/',
     'search.placeholder': 'Buscar en Pāli, Español, Inglés, Portugués...',
     'tabs.reader': '📖 Lector',
+    'tabs.anki': '🎴 Anki SRS',
+    'tabs.matrix': '📊 Matrices',
     'tabs.dictionary': '📚 Diccionario',
 
     // Dicionário
