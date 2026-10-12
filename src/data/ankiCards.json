@@ -111,9 +111,10 @@
       "answer": "Breve: 89 | Detallado: 121\n• Sensorial: 54\n• Forma Sutil: 15\n• Inmaterial: 12\n• Supramundano: 8 o 40",
       "breakdown": [
         "Sensorial (54) = 12 akusala + 18 ahetuka + 24 sobhana.",
-        "Forma (15) = 5 kusala + 5 vipāka + 5 kiriya.",
+        "Forma Sutil (15) = 5 kusala + 5 vipāka + 5 kiriya.",
         "Inmaterial (12) = 4 kusala + 4 vipāka + 4 kiriya.",
-        "Supramundano (8/40) = 4 magga + 4 phala (× 5 jhānas)."
+        "Supramundano (8/40) = 4 magga + 4 phala (× 5 jhānas).",
+        "Totales: 54 + 15 + 12 + 8 = 89; 54 + 15 + 12 + 40 = 121."
       ],
       "explanation": "81 mundanos fijos; 8 supramundanos se expanden a 40.",
       "mnemonicOrExamTip": "Fórmula: 81 + 40 = 121.",
@@ -281,7 +282,10 @@
       "question": "¿Cuáles son los 24 Cittas Bellos de la Esfera Sensorial?",
       "answer": "3 octetos simétricos:\n• 8 Mahākusala (Beneficiosos)\n• 8 Mahāvipāka (Resultantes)\n• 8 Mahākiriya (Funcionales de Arahants)\nTotal: 24.",
       "breakdown": [
-        "Pares: Alegría/Ecuanimidad, Con sabiduría/Sin sabiduría, No inducido/Inducido."
+        "Cada octeto está formado por 3 pares:",
+        "1. Sensación: Alegría (somanassa - 4) vs Ecuanimidad (upekkhā - 4).",
+        "2. Sabiduría: Asociado con conocimiento (ñāṇasampayutta - 4) vs Disociado (ñāṇavippayutta - 4).",
+        "3. Instigación: Espontáneo (asaṅkhārika - 4) vs Inducido (sasaṅkhārika - 4)."
       ],
       "explanation": "Estructura idéntica en los 3 grupos.",
       "mnemonicOrExamTip": "Simetría perfecta de 8 × 3.",
@@ -440,7 +444,8 @@
       "question": "¿Cómo se expanden los 8 Lokuttara a 40?",
       "answer": "Breve: 8 | Detallado: 40 (8 × 5 Jhānas = 40).\n20 Maggas + 20 Phalas.",
       "breakdown": [
-        "81 mundanos + 40 supramundanos = 121."
+        "Sotāpatti, Sakadāgāmī, Anāgāmī y Arahatta se multiplican por los 5 niveles de jhāna.",
+        "Total de cittas: 81 mundanos + 40 supramundanos = 121."
       ],
       "explanation": "Adoptan los factores del jhāna base de discernimiento.",
       "mnemonicOrExamTip": "Total Kusala: 21/37; Vipāka: 36/52.",
@@ -546,10 +551,10 @@
     },
     "es": {
       "question": "¿Cómo se clasifican los Cittas por Raíz (Hetubheda)?",
-      "answer": "• Ahetuka (0): 18\n• Ekahetuka (1): 2 (moha)\n• Dvihetuka (2): 22\n• Tihetuka (3): 47 u 79",
+      "answer": "• Ahetuka (0 raíces): 18\n• Ekahetuka (1 raíz): 2 (los 2 momūhacittas solo tienen moha)\n• Dvihetuka (2 raíces): 22 (8 lobha + 2 dosa + 12 kāma-sobhana sin conocimiento)\n• Tihetuka (3 raíces): 47 (breve) o 79 (detallado) (12 kāma-sobhana con conocimiento + 15 rūpa + 12 arūpa + 8 o 40 lokuttara)",
       "breakdown": [
-        "Total: 89 o 121.",
-        "Solo renacimientos tihetuka logran jhāna o nirvana."
+        "Cálculo: 18 + 2 + 22 + 47 = 89; o 18 + 2 + 22 + 79 = 121.",
+        "Los cittas tihetuka poseen no-codicia, no-aversión y sabiduría (alobha, adosa, amoha)."
       ],
       "explanation": "Distribución de alobha, adosa, amoha.",
       "mnemonicOrExamTip": "Ahetuka (18), Eka (2), Dvi (22), Ti (47/79).",
@@ -600,7 +605,8 @@
       "question": "¿Cuáles son las 4 características de asociación de los Cetasikas?",
       "answer": "1. Ekuppāda (Surgen juntos)\n2. Ekanirodha (Cesan juntos)\n3. Ekālambaṇa (Mismo objeto)\n4. Ekavatthuka (Misma base física)",
       "breakdown": [
-        "Simultáneos en todo momento."
+        "Simultaneidad en surgimiento y disolución.",
+        "Identidad de objeto cognitivo y soporte físico."
       ],
       "explanation": "Inseparables en la cognición.",
       "mnemonicOrExamTip": "Los 4 términos 'Eka-'.",
@@ -654,7 +660,9 @@
       "question": "¿Cómo se dividen los 52 Cetasikas?",
       "answer": "• Variables éticos: 13 (7 Universales + 6 Ocasionales)\n• Perjudiciales: 14\n• Bellos: 25\nTotal: 52.",
       "breakdown": [
-        "13 + 14 + 25 = 52."
+        "Aññasamāna adoptan la cualidad ética del citta anfitrión.",
+        "Akusala surgen únicamente en estados perjudiciales.",
+        "Sobhana surgen únicamente en estados bellos."
       ],
       "explanation": "Clasificación categórica fija.",
       "mnemonicOrExamTip": "Fórmula: 13 + 14 + 25 = 52.",
@@ -815,7 +823,8 @@
       "question": "¿Cuáles son los 14 Akusala Cetasikas y sus incompatibilidades?",
       "answer": "4 Moha + 3 Lobha (lobha, diṭṭhi, māna) + 4 Dosa + 2 Torpor + 1 Vicikicchā.\n• Diṭṭhi y Māna nunca coexisten.\n• Issā, macchariya y kukkucca solo en Dosa.\n• Thīna-middha solo en 5 inducidos.",
       "breakdown": [
-        "Moha acompaña a los 12 akusala."
+        "Los 4 factores de Moha acompañan a todos los 12 akusala cittas.",
+        "Vicikicchā surge únicamente en 1 citta."
       ],
       "explanation": "Incompatibilidad de diṭṭhi y māna.",
       "mnemonicOrExamTip": "Diṭṭhi y Māna son mutuamente excluyentes.",
@@ -867,7 +876,8 @@
       "question": "¿Cuáles son los 25 Sobhana Cetasikas y la regla de las Virati?",
       "answer": "19 Universales bellos + 3 Virati + 2 Appamaññā + 1 Paññindriya.\nVirati: En lo mundano surgen por separado; en Lokuttara surgen SIMULTÁNEAMENTE.",
       "breakdown": [
-        "Appamaññā no entran en Lokuttara por su objeto (seres)."
+        "Appamaññā toman a los seres vivos como objeto; no entran en Lokuttara (cuyo objeto es Nibbāna).",
+        "Paññā surge en los 47 o 79 cittas tihetuka."
       ],
       "explanation": "Purificación simultánea en el despertar.",
       "mnemonicOrExamTip": "Virati simultáneas en Lokuttara.",
@@ -917,7 +927,7 @@
     },
     "es": {
       "question": "¿Cuántos Cetasikas hay en: (1) 1º Lobha, (2) Vicikicchā, (3) Lokuttara 1º Jhāna?",
-      "answer": "(1) 1º Lobha: 19\n(2) Vicikicchā: 15\n(3) Lokuttara 1º Jhāna: 36",
+      "answer": "(1) 1º Lobha: 19 cetasikas (13 aññasamāna + 4 moha + 2 lobha/diṭṭhi)\n(2) Vicikicchā: 15 cetasikas (7 universales + 3 ocasionales + 4 moha + 1 vicikicchā)\n(3) Lokuttara 1º Jhāna: 36 cetasikas (13 aññasamāna + 19 bellos + 3 virati + 1 paññā)",
       "breakdown": [
         "Vicikicchā excluye adhimokkha.",
         "Lokuttara excluye Appamaññā."
@@ -975,8 +985,9 @@
       "question": "¿Cuáles son las 14 Funciones y qué citta cumple más funciones?",
       "answer": "1. Paṭisandhi, 2. Bhavaṅga, 3. Āvajjana, 4-8. 5 sentidos, 9. Sampaṭicchana, 10. Santīraṇa, 11. Voṭṭhabbana, 12. Javana, 13. Tadārammaṇa, 14. Cuti.\nCitta con más funciones: Santīraṇa upekkhā (5).",
       "breakdown": [
-        "19 cittas en paṭisandhi, bhavaṅga y cuti.",
-        "55 en javana."
+        "19 Cittas realizan Paṭisandhi, Bhavaṅga y Cuti.",
+        "55 Cittas realizan Javana.",
+        "11 Cittas realizan Tadārammaṇa."
       ],
       "explanation": "Proceso sin alma fija.",
       "mnemonicOrExamTip": "19 cittas del ciclo vital.",
@@ -1499,7 +1510,8 @@
       "question": "¿Cuáles son los 37 Bodhipakkhiya Dhammas y su reducción a 14 factores?",
       "answer": "37 Factores (Satipaṭṭhāna, Sammappadhāna, Iddhipāda, Indriya, Bala, Bojjhaṅga, Maggaṅga).\nSe reducen a 14 Cetasikas. Vīriya se repite 9 veces.",
       "breakdown": [
-        "Vīriya 9 veces, Sati 8 veces, Paññā 5 veces."
+        "Vīriya es el factor supremo de esfuerzo que aparece 9 veces en los 37 factores.",
+        "Sati aparece 8 veces; Paññā aparece 5 veces."
       ],
       "explanation": "Gran síntesis del camino budista.",
       "mnemonicOrExamTip": "Factor más repetido: Vīriya (9 veces).",
@@ -1601,7 +1613,7 @@
     },
     "es": {
       "question": "¿Cuáles son las 24 Condiciones del Paṭṭhāna?",
-      "answer": "24 Paccayas (Hetu a Avigata).\nHetupaccaya: Raíz que fija la mente como las raíces de un árbol.",
+      "answer": "24 Condiciones (Paccayas): 1. Hetu, 2. Ārammaṇa, 3. Adhipati, 4. Anantara, 5. Samanantara, 6. Sahajāta, 7. Aññamañña, 8. Nissaya, 9. Upanissaya, 10. Purejāta, 11. Pacchājāta, 12. Āsevana, 13. Kamma, 14. Vipāka, 15. Āhāra, 16. Indriya, 17. Jhāna, 18. Magga, 19. Sampayutta, 20. Vippayutta, 21. Atthi, 22. Natthi, 23. Vigata, 24. Avigata.\nHetupaccaya: Las 6 raíces que dan firmeza a la mente como las raíces de un árbol.",
       "breakdown": [
         "Relaciones causales simultáneas.",
         "Sahajāta (co-nacimiento) vs Aññamañña (mutuo)."
@@ -1707,8 +1719,7 @@
       "question": "¿Cuáles son los 40 Temas de Samatha y su alcance?",
       "answer": "10 Kasiṇas + 10 Asubhas + 10 Anussatis + 4 Brahmavihāras + 1 Comida + 1 Elementos + 4 Arūpas = 40.\nKasiṇas y respiración alcanzan los 5 Jhānas.",
       "breakdown": [
-        "Asubhas solo 1º Jhāna.",
-        "Recordaciones alcanzan upacāra."
+        "Samatha pacifica la mente fijándola en un nimitta conceptual (Asubhas alcanzan el 1º Jhāna; recordaciones alcanzan upacāra)."
       ],
       "explanation": "Pacificación mental.",
       "mnemonicOrExamTip": "Solo Kasiṇas y Ānāpāna alcanzan 5º Jhāna.",
@@ -1810,7 +1821,8 @@
       "question": "¿Cuáles son las 4 Personas Nobles y sus grillos erradicados?",
       "answer": "1. Sotāpanna (3 grillos, max 7 vidas).\n2. Sakadāgāmī (debilita apego y aversión, 1 vida).\n3. Anāgāmī (destruye apego sensual y aversión, solo Suddhāvāsa).\n4. Arahant (destruye los 5 superiores, fin del renacimiento).",
       "breakdown": [
-        "Aversión erradicada en Anāgāmī; orgullo en Arahant."
+        "10 Grillos (saṃyojana) en total.",
+        "La aversión se erradica en el Anāgāmī; el orgullo y la ignorancia en el Arahant."
       ],
       "explanation": "Fin definitivo de Saṃsāra.",
       "mnemonicOrExamTip": "Aversión en Anāgāmī; orgullo en Arahant.",
@@ -1916,8 +1928,9 @@
       "question": "¿Cuáles son los 3 Ahetuka Kiriya Cittas y sus funciones?",
       "answer": "1. Pañcadvārāvajjana (Advertencia 5 sentidos)\n2. Manodvārāvajjana (Advertencia mente y determinación sensorial)\n3. Hasituppāda (Risa de Arahants con alegría)",
       "breakdown": [
-        "Hasituppāda solo en seres iluminados.",
-        "Manodvārāvajjana actúa como voṭṭhabbana en los sentidos."
+        "Pañcadvārāvajjana: Dirige el flujo de la conciencia desde el bhavaṅga hacia los objetos de los 5 sentidos físicos.",
+        "Manodvārāvajjana: Advierte objetos mentales en la puerta de la mente Y actúa como determinador (voṭṭhabbana) en las 5 puertas sensoriales.",
+        "Hasituppāda: Surge exclusivamente en Budas y Arahants al sonreír ante fenómenos mundanos."
       ],
       "explanation": "Actividad funcional pura sin residuo cármico.",
       "mnemonicOrExamTip": "Hasituppāda es exclusivo de Arahants.",
@@ -2028,8 +2041,9 @@
       "question": "¿Cuáles son los 11 Cetasikas Inconstantes (Aniyata)?",
       "answer": "Surgen de forma intermitente según circunstancias:\n1. Māna (Orgullo)\n2. Issā (Envidia)\n3. Macchariya (Avaricia)\n4. Kukkucca (Remordimiento)\n5. Thīna (Pereza)\n6. Middha (Letargo)\n7-9. 3 Virati (en lo mundano)\n10-11. 2 Appamaññā (Compasión y Alegría altruista)",
       "breakdown": [
-        "Los otros 41 son constantes (niyata).",
-        "Las 3 Virati se vuelven constantes en Lokuttara."
+        "Los otros 41 cetasikas son constantes (niyata): surgen infaliblemente con su citta.",
+        "Los 11 Aniyata dependen de su estímulo psicológico específico (ej. orgullo al compararse; envidia ante el éxito ajeno).",
+        "En Lokuttara, las 3 Virati pasan de Aniyata a NIYATA (surgen juntas e infaliblemente)."
       ],
       "explanation": "No siempre están presentes en sus cittas huéspedes.",
       "mnemonicOrExamTip": "52 = 41 Constantes + 11 Inconstantes.",
@@ -2190,8 +2204,9 @@
       "question": "¿Cuáles son las 3 condiciones indispensables para que surja Tadārammaṇa?",
       "answer": "1. Ser del plano sensorial (Kāma)\n2. Javanas del plano sensorial\n3. Objeto sensorial claro y nítido",
       "breakdown": [
-        "Si falta una condición, no hay tadārammaṇa.",
-        "11 cittas cumplen esta función (3 santīraṇa + 8 mahāvipāka)."
+        "¡Si falta cualquiera de estas 3 condiciones, Tadārammaṇa NO puede surgir!",
+        "Total de Cittas que cumplen Tadārammaṇa: Exactamente 11 (3 Santīraṇa + 8 Mahāvipāka).",
+        "¿Por qué no surge en los reinos de Brahma? Porque los Brahmas carecen del mecanismo de retención sensorial de los seres del plano sensual."
       ],
       "explanation": "Es el registro o eco del estímulo sensorial.",
       "mnemonicOrExamTip": "Regla del Triple Kāma.",
@@ -2244,8 +2259,9 @@
       "question": "¿Cuáles son las 5 Acciones con Retribución Inmediata (Ānantariya Kamma)?",
       "answer": "1. Matar a la madre\n2. Matar al padre\n3. Matar a un Arahant\n4. Herir a un Buda\n5. Provocar un cisma en la Saṅgha (la más grave de todas).",
       "breakdown": [
-        "Kamma Garuka: Maduración inmediata en el infierno Avīci en la siguiente vida.",
-        "Bloquean todo logro espiritual en esa existencia."
+        "Categoría: Kamma Perjudicial de Máximo Peso (Akusala Garuka Kamma).",
+        "Consecuencia: Garantiza renacimiento inmediato en el infierno Avīci en la siguiente vida e impide alcanzar Jhāna o Iluminación en esa existencia.",
+        "Jerarquía de gravedad: Provocar un cisma en la Saṅgha (Saṅgha-bheda) es el más pesado de los cinco."
       ],
       "explanation": "Los crímenes más graves de la ética budista.",
       "mnemonicOrExamTip": "Saṅgha-bheda es el acto más perjudicial de todos.",
@@ -2297,10 +2313,11 @@
     },
     "es": {
       "question": "¿Cómo se clasifica Nibbāna en Khandhas, Āyatanas, Dhātus y Saccas?",
-      "answer": "• Khandhas: EXCLUIDO (Khandhavimutta - los agregados son condicionados).\n• Āyatanas: Dhammāyatana.\n• Dhātus: Dhammadhātu.\n• Saccas: Nirodhasacca (3ª Noble Verdad).",
+      "answer": "• 5 Khandhas: EXCLUIDO (Khandhavimutta - los agregados son condicionados; solo los 71 dhammas condicionados entran en los 5 agregados).\n• 12 Āyatanas: Incluido en Dhammāyatana.\n• 18 Dhātus: Incluido en Dhammadhātu.\n• 4 Saccas: Es la 3ª Noble Verdad (Nirodhasacca).",
       "breakdown": [
-        "Nibbāna no es un agregado temporal.",
-        "Es objeto mental último y cesación del sufrimiento."
+        "¿Por qué Nibbāna está excluido de los Khandhas? Porque los agregados tienen pasado, presente y futuro (marcas de lo condicionado), mientras que Nibbāna es incondicionado.",
+        "En las 12 Āyatanas y los 18 Dhātus, actúa como objeto supremo de la mente.",
+        "En las 4 Nobles Verdades, es la 3ª Verdad: Nirodha (Cesación)."
       ],
       "explanation": "Localización ontológica precisa de lo incondicionado.",
       "mnemonicOrExamTip": "Nibbāna es Khandhavimutta (fuera de los agregados).",
@@ -2355,7 +2372,10 @@
       "question": "¿Cuáles son las 8 fórmulas canónicas de Lobhamūlacitta en Pāli?",
       "answer": "1. Somanassa + diṭṭhigatasampayutta + asaṅkhārika\n2. Somanassa + diṭṭhigatasampayutta + sasaṅkhārika\n3. Somanassa + diṭṭhigatavippayutta + asaṅkhārika\n4. Somanassa + diṭṭhigatavippayutta + sasaṅkhārika\n5. Upekkhā + diṭṭhigatasampayutta + asaṅkhārika\n6. Upekkhā + diṭṭhigatasampayutta + sasaṅkhārika\n7. Upekkhā + diṭṭhigatavippayutta + asaṅkhārika\n8. Upekkhā + diṭṭhigatavippayutta + sasaṅkhārika",
       "breakdown": [
-        "Impares: Asaṅkhārika. Pares: Sasaṅkhārika."
+        "1 a 4 son con alegría (somanassa); 5 a 8 son con ecuanimidad (upekkhā).",
+        "1, 2, 5 y 6 están asociados con visión errónea (diṭṭhigata-sampayutta).",
+        "3, 4, 7 y 8 están disociados de visión errónea (diṭṭhigata-vippayutta).",
+        "Impares (1,3,5,7) son espontáneos (asaṅkhārika); Pares (2,4,6,8) son inducidos (sasaṅkhārika)."
       ],
       "explanation": "Fórmula canónica esencial del Abhidhamma.",
       "mnemonicOrExamTip": "Impar = espontáneo; Par = inducido.",
@@ -2410,8 +2430,9 @@
       "question": "¿Cuáles son los 6 Pares (Yugala) de Sobhana Cetasikas?",
       "answer": "6 Pares (12 cetasikas):\n1. Passaddhi (Tranquilidad)\n2. Lahutā (Ligereza)\n3. Mudutā (Maleabilidad)\n4. Kammaññatā (Adaptabilidad)\n5. Pāguññatā (Competencia)\n6. Ujukatā (Rectitud)\nCada uno aplicado a Kāya (factores) y Citta (conciencia).",
       "breakdown": [
-        "'Kāya' aquí significa el grupo mental (nāmakāya), no el cuerpo físico.",
-        "Opuestos a torpor, agitación e hipocresía."
+        "En estos pares, 'Kāya' se refiere al cuerpo de factores mentales (nāmakāya), ¡NO al cuerpo físico!",
+        "'Citta' se refiere a la conciencia en sí misma.",
+        "Contrarrestan la agitación (uddhacca), pesadez (thīna-middha), rigidez (diṭṭhi-māna), torpeza espiritual y engaño."
       ],
       "explanation": "Cualidades de gracia y pureza en la mente sana.",
       "mnemonicOrExamTip": "Kāya = factores mentales, no cuerpo físico.",
@@ -2450,7 +2471,7 @@
     },
     "pt": {
       "question": "Quais são os 55 Cittas que desempenham a função de Javana (Impulsão Cármica)?",
-      "answer": "Os 55 Javana Cittas:\n• 12 Akusala Cittas (Inábeis)\n• 1 Ahetuka Hasituppāda (Riso do Arahant)\n• 8 Mahākusala (Hábeis sensoriais)\n• 8 Mahākiriya (Funcionais de Arahant)\n• 10 da Forma Sutil (5 Kusala + 5 Kiriya)\n• 8 Imateriais (4 Kusala + 4 Kiriya)\n• 8 Lokuttara (4 Caminhos + 4 Frutos)\nTotal: 12 + 1 + 8 + 8 + 10 + 8 + 8 = 55 Cittas.",
+      "answer": "Exatamente 55 Cittas (ou 87 detalhado) operam como Javana:\n• 12 Akusala (todos os 12)\n• 1 Ahetuka Kiriya: APENAS o Hasituppāda (sorriso do Arahant)\n• 8 Mahākusala + 8 Mahākiriya (16 Kāma-sobhana)\n• 5 Rūpa Kusala + 5 Rūpa Kiriya (10 Rūpāvacara)\n• 4 Arūpa Kusala + 4 Arūpa Kiriya (8 Arūpāvacara)\n• 4 Magga + 4 Phala (8 ou 40 Lokuttara)\nTotal: 12 + 1 + 16 + 10 + 8 + 8 = 55 Cittas.",
       "breakdown": [
         "Por que os Vipākas não são javanas? Porque resultantes são frutos passivos; Javana é o momento ativo onde se planta karma novo ou se vivencia o fruto sublime da libertação.",
         "O Hasituppāda é o ÚNICO citta ahetuka que opera como javana."
@@ -2461,7 +2482,7 @@
     },
     "es": {
       "question": "¿Cuáles son los 55 Javana Cittas?",
-      "answer": "12 Akusala + 1 Hasituppāda + 8 Mahākusala + 8 Mahākiriya + 10 Rūpa (kusala/kiriya) + 8 Arūpa (kusala/kiriya) + 8 Lokuttara = 55.",
+      "answer": "Exactamente 55 Cittas (u 87 detallado) operan como Javana:\n• 12 Akusala + 1 Hasituppāda + 8 Mahākusala + 8 Mahākiriya + 10 Rūpa (kusala/kiriya) + 8 Arūpa (kusala/kiriya) + 8 (o 40) Lokuttara = 55.",
       "breakdown": [
         "Fase activa de generación de kamma.",
         "Hasituppāda es el único ahetuka en javana."
@@ -2520,8 +2541,10 @@
       "question": "¿Cuáles son las 4 variedades del proceso en los sentidos por intensidad del objeto?",
       "answer": "1. Atimahanta (Muy grande): Llega a Tadārammaṇa (17 momentos).\n2. Mahanta (Grande): Llega a Javana.\n3. Paritta (Pequeño): Llega a Voṭṭhabbana (sin javana).\n4. Atiparitta (Muy pequeño): Solo sacude el bhavaṅga.",
       "breakdown": [
-        "Gradación de impacto sensorial.",
-        "Solo Atimahanta y Mahanta generan kamma activo."
+        "Atimahantārammaṇa: Impacto intenso desde el 1º instante de bhavaṅga.",
+        "Mahantārammaṇa: Llega tras 2 o 3 momentos de bhavaṅga pasado, sin tiempo para tadārammaṇa.",
+        "Parittārammaṇa: Objeto débil; la mente determina pero no genera javana.",
+        "Atiparittārammaṇa: Estímulo levísimo; solo vibra el bhavaṅga sin advertencia."
       ],
       "explanation": "Filtrado cognitivo de estímulos en la mente.",
       "mnemonicOrExamTip": "Tadārammaṇa, Javana, Voṭṭhabbana, Bhavaṅga.",
@@ -2575,8 +2598,9 @@
       "question": "¿Cuáles son los 4 Tipos de Kamma por Tiempo de Maduración?",
       "answer": "1. Diṭṭhadhamma (Esta vida - 1º Javana)\n2. Upapajja (Próxima vida - 7º Javana)\n3. Aparāpariya (Vidas futuras indefinidas - Javanas 2 a 6)\n4. Ahosi (Kamma caducado que perdió vigencia)",
       "breakdown": [
-        "1º y 7º javana pueden caducar (ahosi).",
-        "Los 5 javanas intermedios nunca caducan hasta el Parinibbāna."
+        "1º Javana: El más débil; solo madura en la vida presente; si no, caduca como Ahosi.",
+        "7º Javana: Cierra el proceso; madura en la próxima vida; si falla, caduca como Ahosi.",
+        "Javanas intermedios (2 al 6): Fuerza acumulativa indestructible; ¡NUNCA caducan hasta el Parinibbāna final!"
       ],
       "explanation": "Relación entre micro-momentos mentales y horizontes temporales de renacimiento.",
       "mnemonicOrExamTip": "1º = Presente; 7º = Siguiente vida; 2-6 = Futuro.",
@@ -2631,8 +2655,9 @@
       "question": "¿Cómo se definen las Cuatro Nobles Verdades en términos de Paramattha Dhammas?",
       "answer": "1. Dukkha: 81 cittas mundanos + 51 cetasikas + 28 rūpas.\n2. Samudaya: Cetasika LOBHA (apego/deseo).\n3. Nirodha: NIBBĀNA.\n4. Magga: Los 8 factores del Óctuple Sendero en los 4 Maggacittas.",
       "breakdown": [
-        "Phalacitta no está en las 4 verdades.",
-        "Lobha es la causa aislada (Samudaya)."
+        "Lobha se extrae de las impurezas para constituir por sí solo la 2ª Noble Verdad (Samudaya).",
+        "Los Cittas de Fruto Supramundano (Phalacittas) NO están incluidos en ninguna de las 4 Nobles Verdades (son frutos resultantes, no sufrimiento ni sendero).",
+        "El sufrimiento abarca la totalidad de la mente y materia mundanas (los 5 agregados de apego)."
       ],
       "explanation": "Traducción analítica definitiva del Dharma.",
       "mnemonicOrExamTip": "Phalacitta queda fuera de las 4 Nobles Verdades.",
@@ -2674,7 +2699,8 @@
       "question": "Quais são as 3 Conexões (Sandhi) e os 4 Grupos (Saṅkhepa) da Originação Dependente?",
       "answer": "As 3 Conexões (Sandhi):\n1. Da Causa Passada ao Fruto Presente (Entre Saṅkhāra e Viññāṇa)\n2. Do Fruto Presente à Causa Presente (Entre Vedanā e Taṇhā)\n3. Da Causa Presente ao Fruto Futuro (Entre Bhava e Jāti)\n\nOs 4 Grupos (Saṅkhepa):\n1. Causas Passadas (5 fatores)\n2. Frutos Presentes (5 fatores)\n3. Causas Presentes (5 fatores)\n4. Frutos Futuros (5 fatores)",
       "breakdown": [
-        "Cada grupo possui 5 fatores, totalizando os 20 Modos (Ākārā).",
+        "Cada grupo causal contém 5 fatores, estruturando os 20 Modos (Ākārā):",
+        "5 Causas Passadas + 5 Frutos Presentes + 5 Causas Presentes + 5 Frutos Futuros = 20 Modos.",
         "A 2ª conexão (entre Sensação e Desejo) é o PONTO DE RUPTURA onde a atenção plena pode cortar a reação e cessar o renascimento!"
       ],
       "explanation": "A anatomia detalhada do mecanismo que acorrenta a consciência ao ciclo de vidas.",
@@ -2685,8 +2711,9 @@
       "question": "¿Cuáles son las 3 Conexiones (Sandhi) y dónde se corta la rueda del Paṭiccasamuppāda?",
       "answer": "3 Conexiones: 1. Saṅkhāra a Viññāṇa, 2. Vedanā a Taṇhā, 3. Bhava a Jāti.\nSe corta ÚNICAMENTE en la 2ª conexión: entre Vedanā (sensación) y Taṇhā (deseo).",
       "breakdown": [
-        "4 grupos de 5 factores = 20 modos.",
-        "La atención plena frena el apego ante la sensación."
+        "Cada grupo causal contiene 5 factores, formando los 20 Modos (Ākārā):",
+        "5 Causas Pasadas + 5 Frutos Presentes + 5 Causas Presentes + 5 Frutos Futuros = 20 Modos.",
+        "La 2ª conexión (entre Vedanā y Taṇhā) es el PUNTO CRÍTICO donde la atención plena corta el ciclo del renacimiento."
       ],
       "explanation": "Clave soteriológica del budismo.",
       "mnemonicOrExamTip": "Corte de la rueda: Entre Vedanā y Taṇhā.",
@@ -2955,8 +2982,10 @@
       "question": "¿Cuántos Rūpas produce cada uno de los 4 Orígenes de la Materia?",
       "answer": "Kamma = 18 | Citta = 15 | Utu = 13 | Āhāra = 12.",
       "breakdown": [
-        "Kammaja produce las sensibilidades y el corazón.",
-        "Cittaja produce los gestos y el habla."
+        "Kammaja (18): 8 inseparables (suddhaṭṭhaka) + vida física + 5 sensibilidades + 2 sexos + corazón + espacio.",
+        "Cittaja (15): 8 inseparables + espacio + 2 intimaciones (gesto/habla) + 3 mutabilidades + sonido.",
+        "Utuja (13): 8 inseparables + espacio + sonido (sonidos naturales) + 3 mutabilidades.",
+        "Āhāraja (12): 8 inseparables + espacio + 3 mutabilidades."
       ],
       "explanation": "Causalidad física precisa.",
       "mnemonicOrExamTip": "18, 15, 13, 12.",
@@ -3012,8 +3041,10 @@
       "question": "¿Cuáles son los 3 Signos (Nimitta) de la Meditación Samatha?",
       "answer": "1. Parikamma-nimitta (Objeto físico externo)\n2. Uggaha-nimitta (Imagen mental interna con imperfecciones)\n3. Paṭibhāga-nimitta (Signo de contraparte radiante y purificado)",
       "breakdown": [
-        "El Jhāna surge ÚNICAMENTE sobre el Paṭibhāganimitta.",
-        "Es un concepto mental puro (Atthapaññatti)."
+        "Parikamma-nimitta -> Concentración preliminar (Parikammabhāvanā).",
+        "Uggaha-nimitta -> Concentración de acceso (Upacārabhāvanā).",
+        "Paṭibhāga-nimitta -> Absorción plena (Appanābhāvanā / ¡Jhāna!).",
+        "El Paṭibhāganimitta es un concepto mental puro (Atthapaññatti)."
       ],
       "explanation": "Evolución de la concentración hacia la absorción.",
       "mnemonicOrExamTip": "Jhāna surge en Paṭibhāga-nimitta.",
@@ -3064,8 +3095,8 @@
       "question": "¿Cuáles son los 62 Cittas que surgen con Alegría (Somanassa)?",
       "answer": "En el esquema de 121 cittas, exactamente 62 tienen Somanassa:\n• 4 Lobhamūlacittas\n• 1 Kusalavipāka Santīraṇa + 1 Hasituppāda (2 Ahetuka)\n• 12 Kāma-sobhana (4 mahākusala + 4 mahāvipāka + 4 mahākiriya)\n• 12 Rūpāvacara (1º al 4º Jhāna: 4 jhānas × 3 clases = 12)\n• 32 Lokuttara (1º al 4º Jhāna: 4 jhānas × 8 = 32)\nTotal: 18 + 12 + 32 = 62 Cittas.",
       "breakdown": [
-        "En el sistema quíntuple, el 4º Jhāna abandona Pīti pero conserva Sukha/Somanassa; solo el 5º Jhāna tiene Upekkhā.",
-        "Contraste: 62 cittas con Somanassa vs. 51 cittas con Pīti (Sapītika)."
+        "En el sistema quíntuple (Pañcakanaya), el 4º Jhāna abandona Pīti pero conserva Sukha/Somanassa; solo el 5º Jhāna tiene Upekkhā.",
+        "Contraste: 62 cittas con Somanassa (1º–4º jhānas) vs. 51 cittas con Pīti / Sapītika (18 kāma + 9 rūpa + 24 lokuttara)."
       ],
       "explanation": "Censo completo de mentes gozosas y distinción entre Somanassa (62) y Pīti (51).",
       "mnemonicOrExamTip": "18 Kāma + 12 Rūpa (4×3) + 32 Lokuttara (4×8) = 62 cittas con Somanassa.",
@@ -3120,8 +3151,9 @@
       "question": "¿En cuántos Cittas surge la Sabiduría (Paññindriya)?",
       "answer": "En 47 (breve) o 79 (detallado) Cittas:\n12 Kāma con conocimiento + 15 Rūpa + 12 Arūpa + 8/40 Lokuttara.\nTotal: 47 o 79.",
       "breakdown": [
-        "Coincide exactamente con los Cittas Tihetuka (dotados de 3 raíces).",
-        "Ausente en akusala y ahetuka."
+        "Nunca surge en estados perjudiciales (akusala).",
+        "Nunca surge en estados sin raíz (ahetuka).",
+        "Nunca surge en estados bellos mundanos sin conocimiento (ñāṇavippayutta)."
       ],
       "explanation": "Presencia de la luz del discernimiento.",
       "mnemonicOrExamTip": "Cittas con Paññā = Cittas Tihetuka = 47 o 79.",
@@ -3282,8 +3314,9 @@
       "question": "¿Cuándo cesa de producirse la materia originada por kamma antes de morir?",
       "answer": "Cesa de surgir exactamente en el 17º momento de pensamiento previo a la muerte (Cuti Citta).\nAl disolverse Cuti, toda la materia de kamma perece a la vez.",
       "breakdown": [
-        "Coincide con la vida de 17 momentos de la materia.",
-        "En el cadáver solo sigue materia generada por temperatura (utuja)."
+        "Como la materia dura 17 momentos mentales, la materia generada por kamma en ese 17º momento previo se extingue exactamente cuando cesa el cuti citta.",
+        "En ese instante cesan la facultad vital física (jīvitarūpa), las 5 sensibilidades y la base del corazón.",
+        "En el cadáver solo continúa surgiendo materia generada por la temperatura (utuja-rūpa)."
       ],
       "explanation": "Sincronía bio-psíquica de la muerte.",
       "mnemonicOrExamTip": "17 momentos antes de cuti cesa la producción de kammaja-rūpa.",
@@ -3393,7 +3426,10 @@
       "question": "¿Cuáles son las 3 Puertas de la Liberación (Vimokkhamukha)?",
       "answer": "1. Suññata (Vacío) -> Vía ANATTĀ (No-yo).\n2. Animitta (Sin signo) -> Vía ANICCA (Impermanencia).\n3. Appaṇihita (Sin deseo) -> Vía DUKKHA (Sufrimiento).",
       "breakdown": [
-        "Conexión directa entre las 3 marcas de la existencia y la iluminación."
+        "Contemplación de Anattā -> Suññata (Vacío).",
+        "Contemplación de Anicca -> Animitta (Sin Signo).",
+        "Contemplación de Dukkha -> Appaṇihita (Sin Deseo).",
+        "La característica que predomina en el instante culminante de introspección da su nombre a la liberación."
       ],
       "explanation": "Los 3 modos de acceso a Nibbāna.",
       "mnemonicOrExamTip": "Anattā = Vacío; Anicca = Sin signo; Dukkha = Sin deseo.",

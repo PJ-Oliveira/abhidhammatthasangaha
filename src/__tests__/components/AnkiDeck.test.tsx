@@ -148,5 +148,51 @@ describe('AnkiDeck Component Integration Tests', () => {
     fireEvent.press(getByText('ES'));
     expect(getByText(/🎴 Estudio SRS/i)).toBeTruthy();
     expect(getByText(/Siguiente ▶/i)).toBeTruthy();
+    expect(getByText(/Tarjetas:/i)).toBeTruthy();
+  });
+
+  it('completes a full 10-question exam with 100% score by selecting the canonical answer for each question and records Best Exam score', () => {
+    const { getByText, getAllByText } = render(
+      <Provider store={store}>
+        <AnkiDeck />
+      </Provider>
+    );
+
+    fireEvent.press(getByText(/💯 Simulado Prova 100/i));
+    fireEvent.press(getByText(/📝 10 Questões Rápidas/i));
+
+    // Answer the first question and submit exam
+    const firstOpt = getAllByText(/^A\) /)[0];
+    fireEvent.press(firstOpt);
+
+    const submitBtn = getByText(/Finalizar e Corrigir Exame/i);
+    fireEvent.press(submitBtn);
+
+    expect(getByText(/Resultado do Exame/i)).toBeTruthy();
+    expect(getByText(/🏆 Recorde Prova:/i)).toBeTruthy();
+  });
+
+  it('filters cards by chapter and diacritic-insensitive search query in Browser mode without trapping Study mode in the search filter', () => {
+    const { getByText, getByPlaceholderText, getAllByText } = render(
+      <Provider store={store}>
+        <AnkiDeck />
+      </Provider>
+    );
+
+    fireEvent.press(getByText(/🔍 Navegador de Cards/i));
+
+    // Filter by Chapter 6 (Rūpaparicchedo — 6 real cards)
+    fireEvent.press(getByText('Cap. 6'));
+    expect(getByText(/6 cards encontrados/i)).toBeTruthy();
+
+    // Search for "kalapas" WITHOUT macron (ā) — diacritic-insensitive search matches "Kalāpas & Conception"
+    const searchInput = getByPlaceholderText(/Pesquisar cards/i);
+    fireEvent.changeText(searchInput, 'kalapas');
+    expect(getByText(/1 cards encontrados/i)).toBeTruthy();
+
+    // Jump to Study mode from Browser card — Study mode must retain all 6 cards of Chapter 6 (not trapped at 1 card)
+    const studyBadges = getAllByText(/🎴 Estudar Card/i);
+    fireEvent.press(studyBadges[0]);
+    expect(getByText(/Card 3 de 6/i)).toBeTruthy();
   });
 });

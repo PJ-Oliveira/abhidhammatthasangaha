@@ -1,6 +1,6 @@
 import { Segment } from '../../types/models';
 
-export async function loadChapter(id: string): Promise<Segment[]> {
+export function loadChapterSync(id: string): Segment[] {
   switch (id) {
     case 'ch01': return require('./ch01.json');
     case 'ch02': return require('./ch02.json');
@@ -15,4 +15,8 @@ export async function loadChapter(id: string): Promise<Segment[]> {
       console.warn(`Chapter ${id} not found, falling back to empty array.`);
       return [];
   }
+}
+
+export async function loadChapter(id: string): Promise<Segment[]> {
+  return loadChapterSync(id);
 }

@@ -10,7 +10,7 @@ import { ChapterSidebar } from './ChapterSidebar/ChapterSidebar';
 import { ExportModal } from './ExportModal/ExportModal';
 import { Text } from './ui/AppText';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { toggleSidebar, setCurrentChapter, setExportModalOpen, setActiveAnchorSegmentId } from '../store/slices/readingSlice';
+import { toggleSidebar, setCurrentChapter, setExportModalOpen, setActiveAnchorSegmentId, setDictionaryWord } from '../store/slices/readingSlice';
 import { setUiLanguage } from '../store/slices/settingsSlice';
 import { CHAPTERS, getChapter } from '../data/chapters/chapterIndex';
 import { loadChapter } from '../data/chapters/chapterLoader';
@@ -318,7 +318,10 @@ const HomeScreen = () => {
             <View style={[styles.tabBar, { paddingHorizontal: padX }]}>
               <TouchableOpacity
                 style={[styles.tab, activeTab === 'reader' && styles.tabActive]}
-                onPress={() => setActiveTab('reader')}
+                onPress={() => {
+                  if (activeTab === 'dictionary') dispatch(setDictionaryWord(null));
+                  setActiveTab('reader');
+                }}
               >
                 <Text style={[styles.tabText, activeTab === 'reader' && styles.tabTextActive]}>
                   {t('tabs.reader', uiLanguage)}
@@ -326,7 +329,10 @@ const HomeScreen = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.tab, activeTab === 'anki' && styles.tabActive]}
-                onPress={() => setActiveTab('anki')}
+                onPress={() => {
+                  if (activeTab === 'dictionary') dispatch(setDictionaryWord(null));
+                  setActiveTab('anki');
+                }}
               >
                 <Text style={[styles.tabText, activeTab === 'anki' && styles.tabTextActive]}>
                   {t('tabs.anki', uiLanguage)}
@@ -334,7 +340,10 @@ const HomeScreen = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.tab, activeTab === 'matrix' && styles.tabActive]}
-                onPress={() => setActiveTab('matrix')}
+                onPress={() => {
+                  if (activeTab === 'dictionary') dispatch(setDictionaryWord(null));
+                  setActiveTab('matrix');
+                }}
               >
                 <Text style={[styles.tabText, activeTab === 'matrix' && styles.tabTextActive]}>
                   {t('tabs.matrix', uiLanguage)}
@@ -361,6 +370,7 @@ const HomeScreen = () => {
       {/* Sidebar overlay, Dicionário Modal e Modal de Exportação */}
       <ChapterSidebar />
       <TermBottomSheet
+        hidden={activeTab !== 'reader'}
         onOpenFullDictionary={() => {
           setActiveTab('dictionary');
         }}
@@ -388,10 +398,12 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#E8DCC8',
+    rowGap: 8,
   },
   headerStacked: {
     flexDirection: 'column',
@@ -407,10 +419,11 @@ const styles = StyleSheet.create({
     flex: 1,
     width: 'auto',
     marginRight: 12,
-    minWidth: 0, // permite o título truncar em vez de empurrar o seletor de idioma
+    minWidth: 200, // garante largura legível para o título em tablets / landscape antes de quebrar linha
   },
   headerRight: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     flexShrink: 0,
     gap: 8,

@@ -124,4 +124,28 @@ describe('Anki Cards Rigorous Dataset Unit Tests', () => {
     const vipassanaCard = ANKI_CARDS.find((c) => c.id === 'ch9-02');
     expect(vipassanaCard?.pt.answer).toContain('10');
   });
+
+  it('guarantees cross-language breakdown and canonical numeric parity across EN, PT, and ES for all 63 cards', () => {
+    const KEY_ABHIDHAMMA_NUMBERS = [
+      '89', '121', '52', '28', '18', '24', '31', '40', '37', '17',
+      '47', '79', '55', '62', '54', '27', '15', '12', '13', '14', '25', '19', '30',
+    ];
+
+    ANKI_CARDS.forEach((card) => {
+      expect(card.en.breakdown.length).toBe(card.pt.breakdown.length);
+      expect(card.en.breakdown.length).toBe(card.es.breakdown.length);
+
+      const enText = `${card.en.answer} ${card.en.breakdown.join(' ')}`;
+      const ptText = `${card.pt.answer} ${card.pt.breakdown.join(' ')}`;
+      const esText = `${card.es.answer} ${card.es.breakdown.join(' ')}`;
+
+      KEY_ABHIDHAMMA_NUMBERS.forEach((num) => {
+        const re = new RegExp(`\\b${num}(?:th|st|nd|rd|º|ª)?\\b`);
+        if (re.test(enText)) {
+          expect(re.test(ptText)).toBe(true);
+          expect(re.test(esText)).toBe(true);
+        }
+      });
+    });
+  });
 });

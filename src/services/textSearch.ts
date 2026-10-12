@@ -1,4 +1,4 @@
-import { loadChapter } from '../data/chapters/chapterLoader';
+import { loadChapter, loadChapterSync } from '../data/chapters/chapterLoader';
 import { stripMarkup } from '../utils/paliMarkup';
 import { CHAPTERS } from '../data/chapters/chapterIndex';
 
@@ -29,6 +29,29 @@ function normalizeForSearch(text: string): string {
     .replace(/[ñ]/g, 'n').replace(/[ṅ]/g, 'n').replace(/[ṇ]/g, 'n')
     .replace(/[ṭ]/g, 't').replace(/[ḍ]/g, 'd').replace(/[ḷ]/g, 'l')
     .replace(/[ṃ]/g, 'm').replace(/[ṁ]/g, 'm');
+}
+
+function buildSearchIndexSync(): void {
+  if (allSegments) return;
+  const segments: (Segment & { _searchKey: string })[] = [];
+  for (const chapterRef of CHAPTERS) {
+    const chapterData = loadChapterSync(chapterRef.id);
+    if (chapterData) {
+      for (const seg of chapterData) {
+        const combinedText = [
+          stripMarkup(seg.pali),
+          seg.translations.en || '',
+          seg.translations.pt || '',
+          seg.translations.es || '',
+        ].join(' ');
+        segments.push({
+          ...seg,
+          _searchKey: normalizeForSearch(combinedText),
+        });
+      }
+    }
+  }
+  allSegments = segments;
 }
 
 /**
@@ -67,7 +90,13 @@ export async function buildSearchIndex(): Promise<void> {
  * Busca em todos os segmentos por um termo usando o cache pré-computado
  */
 export function searchSegments(query: string): SearchResult[] {
-  if (!query || query.trim() === '' || !allSegments) {
+  if (!query || query.trim() === '') {
+    return [];
+  }
+  if (!allSegments) {
+    buildSearchIndexSync();
+  }
+  if (!allSegments) {
     return [];
   }
 
@@ -89,9 +118,8 @@ export function searchSegments(query: string): SearchResult[] {
  */
 export function highlightMatch(text: string, query: string): string {
   if (!query || query.trim() === '' || !text) return text;
-  
-  // Como estamos no React Native, retornamos marcadores de markdown para renderização 
-  // O ideal é a UI lidar com a renderização. Retornaremos envolto em asteriscos para simplificar.
-  const regex = new RegExp(`(${query})`, 'gi');
+
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedQuery})`, 'gi');
   return text.replace(regex, '**$1**');
 }

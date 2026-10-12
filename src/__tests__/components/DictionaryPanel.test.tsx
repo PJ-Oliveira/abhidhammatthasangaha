@@ -1,39 +1,66 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import readingReducer from '../../store/slices/readingSlice';
-import settingsReducer from '../../store/slices/settingsSlice';
+import readingReducer, { setDictionaryWord } from '../../store/slices/readingSlice';
+import settingsReducer, { setUiLanguage } from '../../store/slices/settingsSlice';
 import { DictionaryPanel } from '../../components/Dictionary/DictionaryPanel';
+import { lookupWord } from '../../services/dictionaryService';
 
-jest.mock('../../services/dictionaryService', () => ({
-  searchDictionary: jest.fn().mockReturnValue([{
-    pali: 'citta',
-    grammar: 'noun',
-    meaning: { en: 'mind', pt: 'mente', es: 'mente' }
-  }]),
-  lookupWord: jest.fn().mockReturnValue({
-    pali: 'citta',
-    grammar: 'noun',
-    meaning: { en: 'mind', pt: 'mente', es: 'mente' }
-  }),
-  cleanPaliToken: jest.fn((w) => w),
-}));
-
-describe('DictionaryPanel Component', () => {
-  it('renders and allows typing', () => {
+describe('DictionaryPanel Component — Real Offline Pāli Lexicon Integration (No Mocks)', () => {
+  it('renders quick-lookup terms and looks up real Pāli entries when clicked', () => {
     const store = configureStore({
       reducer: { reading: readingReducer, settings: settingsReducer },
+      preloadedState: {
+        settings: { fontSize: 16, theme: 'light' as const, uiLanguage: 'pt' as const },
+      },
     });
-    const { getByPlaceholderText, getAllByText } = render(
+    const { getByText, getAllByText } = render(
       <Provider store={store}>
         <DictionaryPanel />
       </Provider>
     );
 
-    const input = getByPlaceholderText(/p[aā]li|termo|term/i);
-    fireEvent.changeText(input, 'cit');
+    // Quick lookup pill 'citta'
+    const cittaPill = getAllByText('citta')[0];
+    fireEvent.press(cittaPill);
 
-    expect(getAllByText('citta')[0]).toBeTruthy();
+    const realEntry = lookupWord('citta');
+    expect(realEntry).toBeDefined();
+    expect(getByText(realEntry!.meaning.pt)).toBeTruthy();
+
+    // Switch UI language to EN -> definition dynamically switches to English!
+    act(() => {
+      store.dispatch(setUiLanguage('en'));
+    });
+    expect(getByText(realEntry!.meaning.en)).toBeTruthy();
+
+    // Switch UI language to ES -> definition dynamically switches to Spanish!
+    act(() => {
+      store.dispatch(setUiLanguage('es'));
+    });
+    expect(getByText(realEntry!.meaning.es)).toBeTruthy();
+  });
+
+  it('automatically looks up a word when dictionaryWord is dispatched from the Reader', () => {
+    const store = configureStore({
+      reducer: { reading: readingReducer, settings: settingsReducer },
+      preloadedState: {
+        settings: { fontSize: 16, theme: 'light' as const, uiLanguage: 'en' as const },
+      },
+    });
+    const { getByText } = render(
+      <Provider store={store}>
+        <DictionaryPanel />
+      </Provider>
+    );
+
+    act(() => {
+      store.dispatch(setDictionaryWord('nibbāna'));
+    });
+
+    const nibbanaEntry = lookupWord('nibbāna');
+    expect(nibbanaEntry).toBeDefined();
+    expect(getByText(nibbanaEntry!.meaning.en)).toBeTruthy();
   });
 });

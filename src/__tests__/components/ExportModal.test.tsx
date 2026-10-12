@@ -7,18 +7,7 @@ import readingReducer from '../../store/slices/readingSlice';
 import settingsReducer from '../../store/slices/settingsSlice';
 import { ExportModal } from '../../components/ExportModal/ExportModal';
 
-jest.mock('../../services/exportService', () => ({
-  exportToEpub: jest.fn().mockImplementation((_cfg, cb) => {
-    cb?.(100, 'Concluído');
-    return Promise.resolve();
-  }),
-  exportToPdf: jest.fn().mockImplementation((_cfg, cb) => {
-    cb?.(100, 'Concluído');
-    return Promise.resolve();
-  }),
-}));
-
-describe('ExportModal', () => {
+describe('ExportModal — Real UI Integration Tests (No Mocks)', () => {
   let store: any;
 
   beforeEach(() => {
@@ -27,10 +16,13 @@ describe('ExportModal', () => {
         reading: readingReducer,
         settings: settingsReducer,
       },
+      preloadedState: {
+        settings: { fontSize: 16, theme: 'light' as const, uiLanguage: 'pt' as const },
+      },
     });
   });
 
-  it('renders correctly when visible and allows changing format and mode', () => {
+  it('renders correctly when visible, allows changing format, mode, scope, and UI language, and closes cleanly', () => {
     const handleClose = jest.fn();
     const { getByText } = render(
       <Provider store={store}>
@@ -42,15 +34,20 @@ describe('ExportModal', () => {
     expect(getByText('📚 EPUB (Livro Digital)')).toBeTruthy();
     expect(getByText('📄 PDF (Impressão / A4)')).toBeTruthy();
 
-    // Alterna para PDF
-    const pdfBtn = getByText('📄 PDF (Impressão / A4)');
-    fireEvent.press(pdfBtn);
+    // Switch to PDF
+    fireEvent.press(getByText('📄 PDF (Impressão / A4)'));
 
-    // Alterna modo para monolíngue
-    const monoBtn = getByText(/Monolíngue/);
-    fireEvent.press(monoBtn);
+    // Switch mode to Monolingual
+    fireEvent.press(getByText(/Monolíngue/));
 
-    // Fecha o modal
+    // Switch UI language inside modal to EN and ES
+    fireEvent.press(getByText('EN'));
+    expect(getByText('Export Treatise')).toBeTruthy();
+
+    fireEvent.press(getByText('ES'));
+    expect(getByText('Exportar Obra')).toBeTruthy();
+
+    // Close modal
     const closeBtn = getByText('✕');
     fireEvent.press(closeBtn);
     expect(handleClose).toHaveBeenCalledTimes(1);
@@ -59,7 +56,7 @@ describe('ExportModal', () => {
   it('does not render when visible is false', () => {
     const { queryByText } = render(
       <Provider store={store}>
-        <ExportModal visible={false} onClose={jest.fn()} />
+        <ExportModal visible={false} onClose={() => {}} />
       </Provider>
     );
 

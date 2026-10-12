@@ -6,21 +6,22 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Platform,
 } from 'react-native';
 import { Text } from '../ui/AppText';
 import { useLayout } from '../../theme/layout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { setDictionaryWord, setSearchQuery } from '../../store/slices/readingSlice';
+import { setDictionaryWord } from '../../store/slices/readingSlice';
 import { lookupWord, searchDictionary, cleanPaliToken } from '../../services/dictionaryService';
 import { t } from '../../i18n';
 
 interface TermBottomSheetProps {
   onOpenFullDictionary?: (word: string) => void;
+  hidden?: boolean;
 }
 
 export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
   onOpenFullDictionary,
+  hidden = false,
 }) => {
   const dispatch = useAppDispatch();
   const layout = useLayout();
@@ -43,7 +44,7 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
   };
 
   // No modo split (tablet, desktop), o dicionário já está aberto ao lado na tela.
-  if (layout.isSplit || !dictionaryWord) {
+  if (layout.isSplit || hidden || !dictionaryWord) {
     return null;
   }
 
@@ -53,8 +54,8 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
   const entry = exactEntry || (searchResults.length > 0 ? searchResults[0] : null);
 
   const handleOpenFull = () => {
-    dispatch(setSearchQuery(cleanWord));
-    close();
+    setIsExpanded(false);
+    dispatch(setDictionaryWord(cleanWord));
     onOpenFullDictionary?.(cleanWord);
   };
 
@@ -92,7 +93,7 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
           <View style={styles.handleContainer}>
             <TouchableOpacity
               style={styles.handleBar}
-              onPress={() => setIsExpanded(!isExpanded)}
+              onPress={() => setIsExpanded((prev) => !prev)}
               accessibilityRole="button"
               accessibilityLabel={isExpanded ? t('dict.collapse', uiLanguage) : t('dict.expand', uiLanguage)}
             />
@@ -122,12 +123,9 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
             <View style={styles.headerActions}>
               <TouchableOpacity
                 style={styles.expandBtn}
-                onPress={() => setIsExpanded(!isExpanded)}
+                onPress={() => setIsExpanded((prev) => !prev)}
                 accessibilityRole="button"
                 accessibilityLabel={isExpanded ? t('dict.collapse', uiLanguage) : t('dict.expand', uiLanguage)}
-                {...(Platform.OS === 'web'
-                  ? { onClick: () => setIsExpanded(!isExpanded) }
-                  : {})}
               >
                 <Text style={styles.expandBtnText}>
                   {isExpanded ? t('dict.collapse', uiLanguage) : t('dict.expand', uiLanguage)}
@@ -138,7 +136,6 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
                 onPress={close}
                 accessibilityRole="button"
                 accessibilityLabel="Fechar"
-                {...(Platform.OS === 'web' ? { onClick: close } : {})}
               >
                 <Text style={styles.closeBtnText}>✕</Text>
               </TouchableOpacity>
@@ -195,7 +192,6 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
               onPress={handleOpenFull}
               accessibilityRole="button"
               accessibilityLabel={t('dict.openFull', uiLanguage)}
-              {...(Platform.OS === 'web' ? { onClick: handleOpenFull } : {})}
             >
               <Text style={styles.fullDictBtnText}>
                 📖 {t('dict.openFull', uiLanguage)}

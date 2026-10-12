@@ -9,11 +9,14 @@ import { t } from '../../i18n';
 
 export const SearchBar: React.FC = () => {
   const dispatch = useAppDispatch();
-  const languages = useAppSelector((s) => s.reading.languages);
   const uiLanguage = useAppSelector((s) => s.settings.uiLanguage);
-  const lang = languages.includes('pt') ? 'pt' : languages.includes('es') ? 'es' : 'en';
-  const [query, setQuery] = useState('');
+  const reduxSearchQuery = useAppSelector((s) => s.reading.searchQuery);
+  const [query, setQuery] = useState(reduxSearchQuery);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setQuery(reduxSearchQuery);
+  }, [reduxSearchQuery]);
 
   const executeSearch = useCallback(
     async (textToSearch: string) => {

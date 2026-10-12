@@ -70,4 +70,34 @@ describe('CompendiumMatrix Component Integration Tests', () => {
     expect(getByText(/Matrices Estructurales del Abhidhammatthasaṅgaha/i)).toBeTruthy();
     expect(getByText(/Condición de Raíz/i)).toBeTruthy();
   });
+
+  it('verifies canonical 55 Javana breakdown (10 rūpa + 8 arūpa) and Phoṭṭhabba orthography across PT, EN, and ES', () => {
+    const { getByText, queryByText } = render(
+      <Provider store={store}>
+        <CompendiumMatrix />
+      </Provider>
+    );
+
+    // Check Rūpa (28) tab in PT
+    fireEvent.press(getByText(/Matéria \(28\)/i));
+    expect(getByText(/Phoṭṭhabba = 3 elementos: terra, fogo, ar/i)).toBeTruthy();
+    expect(queryByText(/Photṭhabba/i)).toBeNull();
+
+    // Check 14 Mental Functions (Kicca) tab in PT
+    fireEvent.press(getByText(/14 Funções Mentais/i));
+    expect(getByText(/12 akusala \+ 1 hasituppāda \+ 8 mahākusala \+ 8 mahākiriya \+ 10 rūpa \+ 8 arūpa \+ 8\/40 lokuttara/i)).toBeTruthy();
+    expect(queryByText(/9 rūpa \+ 9 arūpa/i)).toBeNull();
+
+    // Switch to EN and verify both Kicca and Rūpa
+    fireEvent.press(getByText('EN'));
+    expect(getByText(/12 akusala \+ 1 hasituppāda \+ 8 mahākusala \+ 8 mahākiriya \+ 10 rūpa \+ 8 arūpa \+ 8\/40 lokuttara/i)).toBeTruthy();
+    fireEvent.press(getByText(/Matter \(28\)/i));
+    expect(getByText(/Phoṭṭhabba = 3 essentials: earth, fire, air/i)).toBeTruthy();
+
+    // Switch to ES and verify both Rūpa and Kicca
+    fireEvent.press(getByText('ES'));
+    expect(getByText(/Phoṭṭhabba = 3 elementos: tierra, fuego, aire/i)).toBeTruthy();
+    fireEvent.press(getByText(/14 Funciones Mentales/i));
+    expect(getByText(/12 akusala \+ 1 hasituppāda \+ 8 mahākusala \+ 8 mahākiriya \+ 10 rūpa \+ 8 arūpa \+ 8\/40 lokuttara/i)).toBeTruthy();
+  });
 });

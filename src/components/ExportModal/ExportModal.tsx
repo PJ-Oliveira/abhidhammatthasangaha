@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import { Text } from '../ui/AppText';
 import { useLayout } from '../../theme/layout';
@@ -20,7 +19,7 @@ import {
   ExportFormat,
   ExportMode,
 } from '../../services/exportService';
-import type { Language, UiLanguage } from '../../types/models';
+import type { Language } from '../../types/models';
 import { t } from '../../i18n';
 
 interface Props {
@@ -49,6 +48,7 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
   if (!visible) return null;
 
   const handleExport = async () => {
+    if (loading) return;
     setLoading(true);
     setProgressMsg(t('export.progressInit', uiLanguage));
 
@@ -124,9 +124,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                     onPress={() => dispatch(setUiLanguage(lang))}
                     accessibilityRole="button"
                     accessibilityLabel={`Mudar interface para ${lang.toUpperCase()}`}
-                    {...(Platform.OS === 'web'
-                      ? { onClick: () => dispatch(setUiLanguage(lang)) }
-                      : {})}
                   >
                     <Text
                       style={[
@@ -145,7 +142,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                 onPress={onClose}
                 accessibilityRole="button"
                 accessibilityLabel="Fechar"
-                {...(Platform.OS === 'web' ? { onClick: onClose } : {})}
               >
                 <Text style={styles.closeBtnText}>✕</Text>
               </TouchableOpacity>
@@ -163,9 +159,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                 onPress={() => setFormat('epub')}
                 accessibilityRole="button"
                 accessibilityLabel="chip-format-epub"
-                {...(Platform.OS === 'web'
-                  ? { onClick: () => setFormat('epub') }
-                  : {})}
               >
                 <Text
                   style={[
@@ -181,9 +174,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                 onPress={() => setFormat('pdf')}
                 accessibilityRole="button"
                 accessibilityLabel="chip-format-pdf"
-                {...(Platform.OS === 'web'
-                  ? { onClick: () => setFormat('pdf') }
-                  : {})}
               >
                 <Text
                   style={[
@@ -206,9 +196,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                 onPress={() => setMode('bilingual')}
                 accessibilityRole="button"
                 accessibilityLabel="chip-mode-bilingual"
-                {...(Platform.OS === 'web'
-                  ? { onClick: () => setMode('bilingual') }
-                  : {})}
               >
                 <Text
                   style={[
@@ -224,9 +211,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                 onPress={() => setMode('monolingual')}
                 accessibilityRole="button"
                 accessibilityLabel="chip-mode-monolingual"
-                {...(Platform.OS === 'web'
-                  ? { onClick: () => setMode('monolingual') }
-                  : {})}
               >
                 <Text
                   style={[
@@ -251,9 +235,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                     targetLang === 'pt' && styles.chipActive,
                   ]}
                   onPress={() => setTargetLang('pt')}
-                  {...(Platform.OS === 'web'
-                    ? { onClick: () => setTargetLang('pt') }
-                    : {})}
                 >
                   <Text
                     style={[
@@ -270,9 +251,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                     targetLang === 'en' && styles.chipActive,
                   ]}
                   onPress={() => setTargetLang('en')}
-                  {...(Platform.OS === 'web'
-                    ? { onClick: () => setTargetLang('en') }
-                    : {})}
                 >
                   <Text
                     style={[
@@ -289,9 +267,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                     targetLang === 'es' && styles.chipActive,
                   ]}
                   onPress={() => setTargetLang('es')}
-                  {...(Platform.OS === 'web'
-                    ? { onClick: () => setTargetLang('es') }
-                    : {})}
                 >
                   <Text
                     style={[
@@ -311,9 +286,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                     monoLang === 'pali' && styles.chipActive,
                   ]}
                   onPress={() => setMonoLang('pali')}
-                  {...(Platform.OS === 'web'
-                    ? { onClick: () => setMonoLang('pali') }
-                    : {})}
                 >
                   <Text
                     style={[
@@ -330,9 +302,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                     monoLang === 'pt' && styles.chipActive,
                   ]}
                   onPress={() => setMonoLang('pt')}
-                  {...(Platform.OS === 'web'
-                    ? { onClick: () => setMonoLang('pt') }
-                    : {})}
                 >
                   <Text
                     style={[
@@ -349,9 +318,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                     monoLang === 'en' && styles.chipActive,
                   ]}
                   onPress={() => setMonoLang('en')}
-                  {...(Platform.OS === 'web'
-                    ? { onClick: () => setMonoLang('en') }
-                    : {})}
                 >
                   <Text
                     style={[
@@ -368,9 +334,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
                     monoLang === 'es' && styles.chipActive,
                   ]}
                   onPress={() => setMonoLang('es')}
-                  {...(Platform.OS === 'web'
-                    ? { onClick: () => setMonoLang('es') }
-                    : {})}
                 >
                   <Text
                     style={[
@@ -392,9 +355,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
               <TouchableOpacity
                 style={[styles.chip, scope === 'all' && styles.chipActive]}
                 onPress={() => setScope('all')}
-                {...(Platform.OS === 'web'
-                  ? { onClick: () => setScope('all') }
-                  : {})}
               >
                 <Text
                   style={[
@@ -408,9 +368,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
               <TouchableOpacity
                 style={[styles.chip, scope === 'current' && styles.chipActive]}
                 onPress={() => setScope('current')}
-                {...(Platform.OS === 'web'
-                  ? { onClick: () => setScope('current') }
-                  : {})}
               >
                 <Text
                   style={[
@@ -459,7 +416,6 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
             <TouchableOpacity
               style={[styles.exportBtn, loading && styles.exportBtnDisabled]}
               onPress={handleExport}
-              {...(Platform.OS === 'web' ? { onClick: handleExport } : {})}
               disabled={loading}
               accessibilityRole="button"
               accessibilityLabel="btn-generate-export"

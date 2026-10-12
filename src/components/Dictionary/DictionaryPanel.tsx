@@ -10,12 +10,14 @@ import {
 import { Text, TextInput } from '../ui/AppText';
 import { lookupWord, searchDictionary, cleanPaliToken } from '../../services/dictionaryService';
 import type { DictionaryEntry } from '../../types/models';
-import { useAppSelector } from '../../store/hooks';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { setDictionaryWord } from '../../store/slices/readingSlice';
 import { t } from '../../i18n';
 
 const QUICK_TERMS = ['citta', 'cetasika', 'rūpa', 'nibbāna', 'kāmāvacara', 'kusala', 'akusala'];
 
 export const DictionaryPanel: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<DictionaryEntry[]>([]);
   const flatListRef = useRef<FlatList<DictionaryEntry>>(null);
@@ -80,6 +82,7 @@ export const DictionaryPanel: React.FC = () => {
   const handleClear = () => {
     setQuery('');
     setResults([]);
+    dispatch(setDictionaryWord(null));
   };
 
   const handleQuickTermPress = (term: string) => {

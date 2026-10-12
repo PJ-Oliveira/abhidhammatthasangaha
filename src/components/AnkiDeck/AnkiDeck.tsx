@@ -190,29 +190,53 @@ export const AnkiDeck: React.FC = () => {
     }
   }, [mode, selectedChapter, selectedCategory, currentIndex, bestExamScore, examStarted, examSubmitted, examAnswers, examQuestions]);
 
-  // Filter cards
-  const filteredCards = useMemo(() => {
+  // Normalize text for diacritic-insensitive Pāḷi and multilingual search
+  const normalizeSearchText = (str: string): string =>
+    str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+
+  // Filter cards for Study & Exam modes (by chapter and category only)
+  const deckCards = useMemo(() => {
     return ANKI_CARDS.filter((card) => {
       if (selectedChapter !== 'all' && card.chapter !== selectedChapter) return false;
       if (selectedCategory !== 'all' && card.category !== selectedCategory) return false;
-      if (searchQuery.trim() !== '') {
-        const query = searchQuery.toLowerCase();
-        const content = card[lang];
-        const inQuestion = content.question.toLowerCase().includes(query);
-        const inAnswer = content.answer.toLowerCase().includes(query);
-        const inPali = card.paliTerm.toLowerCase().includes(query);
-        const inSection = card.section.toLowerCase().includes(query);
-        const inTags = card.tags.some((tag) => tag.toLowerCase().includes(query));
-        return inQuestion || inAnswer || inPali || inSection || inTags;
-      }
       return true;
     });
-  }, [selectedChapter, selectedCategory, searchQuery, lang]);
+  }, [selectedChapter, selectedCategory]);
 
-  const safeIndex = filteredCards.length > 0
-    ? Math.min(currentIndex, filteredCards.length - 1)
+  // Filter cards for Browser mode (includes diacritic-insensitive search across all fields)
+  const browserCards = useMemo(() => {
+    if (searchQuery.trim() === '') return deckCards;
+    const query = normalizeSearchText(searchQuery.trim());
+    return deckCards.filter((card) => {
+      const content = card[lang];
+      const inQuestion = normalizeSearchText(content.question).includes(query);
+      const inAnswer = normalizeSearchText(content.answer).includes(query);
+      const inPali = normalizeSearchText(card.paliTerm).includes(query);
+      const inSection = normalizeSearchText(card.section).includes(query);
+      const inTags = card.tags.some((tag) => normalizeSearchText(tag).includes(query));
+      const inBreakdown = content.breakdown.some((b) => normalizeSearchText(b).includes(query));
+      const inExplanation = normalizeSearchText(content.explanation).includes(query);
+      const inTip = normalizeSearchText(content.mnemonicOrExamTip).includes(query);
+      return (
+        inQuestion ||
+        inAnswer ||
+        inPali ||
+        inSection ||
+        inTags ||
+        inBreakdown ||
+        inExplanation ||
+        inTip
+      );
+    });
+  }, [deckCards, searchQuery, lang]);
+
+  const safeIndex = deckCards.length > 0
+    ? Math.min(currentIndex, deckCards.length - 1)
     : 0;
-  const currentCard: AnkiCard | undefined = filteredCards[safeIndex];
+  const currentCard: AnkiCard | undefined = deckCards[safeIndex];
 
   const handleSelectChapter = (ch: number | 'all') => {
     setSelectedChapter(ch);
@@ -228,16 +252,14 @@ export const AnkiDeck: React.FC = () => {
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
-    setCurrentIndex(0);
-    setIsFlipped(false);
   };
 
   const handleNextCard = useCallback(() => {
-    if (safeIndex < filteredCards.length - 1) {
+    if (safeIndex < deckCards.length - 1) {
       setCurrentIndex(safeIndex + 1);
       setIsFlipped(false);
     }
-  }, [safeIndex, filteredCards.length]);
+  }, [safeIndex, deckCards.length]);
 
   const handlePrevCard = useCallback(() => {
     if (safeIndex > 0) {
@@ -313,10 +335,10 @@ export const AnkiDeck: React.FC = () => {
 
     // Advance to next card, or wrap around to 0 if on the last card, and always reset flip state
     setIsFlipped(false);
-    if (filteredCards.length > 0) {
-      setCurrentIndex(safeIndex < filteredCards.length - 1 ? safeIndex + 1 : 0);
+    if (deckCards.length > 0) {
+      setCurrentIndex(safeIndex < deckCards.length - 1 ? safeIndex + 1 : 0);
     }
-  }, [currentCard, srsState, filteredCards.length, safeIndex]);
+  }, [currentCard, srsState, deckCards.length, safeIndex]);
 
   const handleResetCache = () => {
     setSrsState({});
@@ -368,7 +390,7 @@ export const AnkiDeck: React.FC = () => {
 
   // Exam Generator — prioritizes same-chapter / same-category distractors for rigorous testing
   const startExam = (questionCount: number = 20) => {
-    const sourcePool = filteredCards.length >= 4 ? [...filteredCards] : [...ANKI_CARDS];
+    const sourcePool = deckCards.length >= 4 ? [...deckCards] : [...ANKI_CARDS];
     for (let i = sourcePool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [sourcePool[i], sourcePool[j]] = [sourcePool[j], sourcePool[i]];
@@ -501,6 +523,7 @@ export const AnkiDeck: React.FC = () => {
       easy: 'Fácil (4)',
       mnemonicTip: '💡 Dica de Prova & Mnemônica',
       cardProgress: 'Card',
+      cardsLabel: 'Cards',
       of: 'de',
       mastery: 'Taxa de Domínio',
       reviewed: 'Revisados',
@@ -569,6 +592,7 @@ export const AnkiDeck: React.FC = () => {
       easy: 'Easy (4)',
       mnemonicTip: '💡 Exam Tip & Mnemonic',
       cardProgress: 'Card',
+      cardsLabel: 'Cards',
       of: 'of',
       mastery: 'Mastery Rate',
       reviewed: 'Reviewed',
@@ -637,6 +661,7 @@ export const AnkiDeck: React.FC = () => {
       easy: 'Fácil (4)',
       mnemonicTip: '💡 Consejo de Examen y Mnemónico',
       cardProgress: 'Tarjeta',
+      cardsLabel: 'Tarjetas',
       of: 'de',
       mastery: 'Tasa de Dominio',
       reviewed: 'Repasadas',
@@ -756,7 +781,7 @@ export const AnkiDeck: React.FC = () => {
   ];
 
   const handleJumpToCardInStudy = (cardId: string) => {
-    const idx = filteredCards.findIndex((c) => c.id === cardId);
+    const idx = deckCards.findIndex((c) => c.id === cardId);
     if (idx >= 0) {
       setCurrentIndex(idx);
       setIsFlipped(false);
@@ -837,7 +862,7 @@ export const AnkiDeck: React.FC = () => {
         <View style={[styles.statsRow, { justifyContent: 'space-between', alignItems: 'center' }]}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
             <Text style={styles.statText}>
-              Cards: <Text style={styles.statBold}>{ANKI_CARDS.length}</Text>
+              {t.cardsLabel}: <Text style={styles.statBold}>{ANKI_CARDS.length}</Text>
             </Text>
             <Text style={styles.statText}>
               {t.reviewed}: <Text style={styles.statBold}>{totalReviewed}</Text>
@@ -916,7 +941,7 @@ export const AnkiDeck: React.FC = () => {
         <View>
           {renderFilterRows()}
 
-          {filteredCards.length === 0 ? (
+          {deckCards.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>{t.emptyFilter}</Text>
             </View>
@@ -925,7 +950,7 @@ export const AnkiDeck: React.FC = () => {
               {/* Counter & Nav */}
               <View style={styles.navRow}>
                 <Text style={styles.counterText}>
-                  {t.cardProgress} {safeIndex + 1} {t.of} {filteredCards.length}
+                  {t.cardProgress} {safeIndex + 1} {t.of} {deckCards.length}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TouchableOpacity
@@ -936,9 +961,9 @@ export const AnkiDeck: React.FC = () => {
                     <Text style={styles.smallBtnText}>{t.prevBtn}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.smallBtn, safeIndex === filteredCards.length - 1 && styles.smallBtnDisabled]}
+                    style={[styles.smallBtn, safeIndex === deckCards.length - 1 && styles.smallBtnDisabled]}
                     onPress={handleNextCard}
-                    disabled={safeIndex === filteredCards.length - 1}
+                    disabled={safeIndex === deckCards.length - 1}
                   >
                     <Text style={styles.smallBtnText}>{t.nextBtn}</Text>
                   </TouchableOpacity>
@@ -1194,9 +1219,9 @@ export const AnkiDeck: React.FC = () => {
           />
           <View style={{ marginTop: 12 }}>
             <Text style={{ fontSize: 13, color: '#64748B', marginBottom: 8 }}>
-              {filteredCards.length} {t.cardsFound}
+              {browserCards.length} {t.cardsFound}
             </Text>
-            {filteredCards.map((card) => (
+            {browserCards.map((card) => (
               <TouchableOpacity
                 key={card.id}
                 style={styles.browserCard}
@@ -1460,17 +1485,6 @@ const styles = StyleSheet.create({
     color: '#B45309',
     fontSize: 11,
     fontWeight: '700',
-  },
-  audioBtn: {
-    backgroundColor: '#EADFC9',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  audioBtnText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#4B2E2A',
   },
   frontContent: {
     alignItems: 'center',
