@@ -11,6 +11,9 @@ describe('AnkiDeck Component Integration Tests', () => {
   let store: any;
 
   beforeEach(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.clear();
+    }
     store = configureStore({
       reducer: {
         reading: readingReducer,
@@ -45,7 +48,7 @@ describe('AnkiDeck Component Integration Tests', () => {
     expect(getByText(/Mostrar Resposta \(Espaço\)/i)).toBeTruthy();
   });
 
-  it('flips card to reveal answer, breakdown and rating buttons, and advances on rating', () => {
+  it('flips card to reveal answer, breakdown and rating buttons, advances on rating, and shows reset cache button', () => {
     const { getByText } = render(
       <Provider store={store}>
         <AnkiDeck />
@@ -60,13 +63,18 @@ describe('AnkiDeck Component Integration Tests', () => {
     // Rating buttons appear
     expect(getByText(/Repetir \(1\)/i)).toBeTruthy();
     expect(getByText(/Difícil \(2\)/i)).toBeTruthy();
-    const goodBtn = getByText(/Bom \(3\)/i);
-    expect(goodBtn).toBeTruthy();
-    expect(getByText(/Fácil \(4\)/i)).toBeTruthy();
+    const easyBtn = getByText(/Fácil \(4\)/i);
+    expect(easyBtn).toBeTruthy();
 
-    // Rate card and advance to Card 2
-    fireEvent.press(goodBtn);
+    // Rate card Easy -> marks as mastered and advances to Card 2
+    fireEvent.press(easyBtn);
     expect(getByText(/Card 2 de 63/i)).toBeTruthy();
+
+    // Reset cache button appears after rating
+    const resetBtn = getByText(/↺ Zerar Progresso/i);
+    expect(resetBtn).toBeTruthy();
+    fireEvent.press(resetBtn);
+    expect(getByText(/Card 1 de 63/i)).toBeTruthy();
   });
 
   it('switches to exam mode, starts a practice exam, and dynamically translates options when switching languages mid-exam', () => {

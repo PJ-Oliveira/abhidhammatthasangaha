@@ -1,5 +1,5 @@
 // src/components/ExportModal/ExportModal.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Modal,
@@ -36,11 +36,15 @@ export const ExportModal: React.FC<Props> = ({ visible, onClose }) => {
 
   const [format, setFormat] = useState<ExportFormat>('epub');
   const [mode, setMode] = useState<ExportMode>('bilingual');
-  const [targetLang, setTargetLang] = useState<'pt' | 'en' | 'es'>('pt');
+  const [targetLang, setTargetLang] = useState<'pt' | 'en' | 'es'>(uiLanguage);
   const [monoLang, setMonoLang] = useState<Language>('pali');
   const [scope, setScope] = useState<'all' | 'current'>('all');
   const [loading, setLoading] = useState(false);
   const [progressMsg, setProgressMsg] = useState('');
+
+  useEffect(() => {
+    setTargetLang(uiLanguage);
+  }, [uiLanguage]);
 
   if (!visible) return null;
 

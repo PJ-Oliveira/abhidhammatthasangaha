@@ -231,13 +231,24 @@ export const Reader: React.FC<ReaderProps> = ({ segments, chapterNumber }) => {
   );
 
   if (visibleSegments.length === 0) {
+    const noResultsMsg =
+      uiLanguage === 'en'
+        ? `No results found for "${searchQuery}"`
+        : uiLanguage === 'es'
+        ? `Sin resultados para "${searchQuery}"`
+        : `Nenhum resultado para "${searchQuery}"`;
+    const emptyChapMsg =
+      uiLanguage === 'en'
+        ? 'No segments in this chapter.'
+        : uiLanguage === 'es'
+        ? 'Ningún segmento en este capítulo.'
+        : 'Nenhum segmento neste capítulo.';
+
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyIcon}>{searchQuery ? '🔍' : '📖'}</Text>
         <Text style={styles.emptyText}>
-          {searchQuery
-            ? `Nenhum resultado para "${searchQuery}"`
-            : 'Nenhum segmento neste capítulo.'}
+          {searchQuery ? noResultsMsg : emptyChapMsg}
         </Text>
       </View>
     );

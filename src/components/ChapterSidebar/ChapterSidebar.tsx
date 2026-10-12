@@ -11,7 +11,7 @@ import { Text } from '../ui/AppText';
 import { useLayout } from '../../theme/layout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setCurrentChapter, setSidebarOpen, setExportModalOpen } from '../../store/slices/readingSlice';
-import { CHAPTERS, PARTS } from '../../data/chapters/chapterIndex';
+import { CHAPTERS } from '../../data/chapters/chapterIndex';
 import { updateBrowserRoute, chapterIdToNumber } from '../../utils/urlRouter';
 import { t } from '../../i18n';
 
@@ -45,55 +45,46 @@ export const ChapterSidebar: React.FC = () => {
       <View style={[styles.sidebar, { width: layout.sidebarWidth }]}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('sidebar.title', uiLanguage)}</Text>
+          <View style={{ flex: 1, marginRight: 8 }}>
+            <Text style={styles.headerTitle}>{t('sidebar.title', uiLanguage)}</Text>
+            <Text style={styles.subtitle}>{t('app.subtitle', uiLanguage)}</Text>
+          </View>
           <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
             <Text style={styles.closeBtnText}>✕</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Chapter list */}
+        {/* Chapter list (9 Paricchedas) */}
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          {PARTS.map((part) => (
-            <View key={part.number} style={styles.partSection}>
-              {/* Part header */}
-              <View style={styles.partHeader}>
-                <Text style={styles.partTitle}>
-                  {t('sidebar.part', uiLanguage)} {part.number} — {part.titles[uiLanguage] || part.titles[translationLang]}
-                </Text>
-              </View>
-
-              {/* Chapters in this part */}
-              {CHAPTERS.filter((ch) => ch.part === part.number).map((ch) => {
-                const isActive = ch.id === currentChapterId;
-                return (
-                  <TouchableOpacity
-                    key={ch.id}
-                    style={[styles.chapterRow, isActive && styles.chapterRowActive]}
-                    onPress={() => handleSelectChapter(ch.id)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.chapterLeft}>
-                      <Text style={[styles.chapterNumber, isActive && styles.chapterTextActive]}>
-                        {ch.number}
-                      </Text>
-                      <Text
-                        style={[styles.chapterPali, isActive && styles.chapterTextActive]}
-                        numberOfLines={1}
-                      >
-                        {ch.paliTitle}
-                      </Text>
-                    </View>
+          <View style={styles.partSection}>
+            {CHAPTERS.map((ch) => {
+              const isActive = ch.id === currentChapterId;
+              return (
+                <TouchableOpacity
+                  key={ch.id}
+                  style={[styles.chapterRow, isActive && styles.chapterRowActive]}
+                  onPress={() => handleSelectChapter(ch.id)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.chapterBadge, isActive && styles.chapterBadgeActive]}>
+                    <Text style={[styles.chapterNumber, isActive && styles.chapterTextActive]}>
+                      {ch.number}
+                    </Text>
+                  </View>
+                  <View style={styles.chapterTextColumn}>
+                    <Text style={[styles.chapterPali, isActive && styles.chapterTextActive]}>
+                      {ch.paliTitle}
+                    </Text>
                     <Text
                       style={[styles.chapterTranslation, isActive && styles.chapterTranslationActive]}
-                      numberOfLines={2}
                     >
                       {ch.titles[uiLanguage] || ch.titles[translationLang]}
                     </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          ))}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
           <View style={{ height: 20 }} />
         </ScrollView>
 
@@ -147,14 +138,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 4,
+    paddingTop: 22,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: 'bold',
     color: '#F5E6D0',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#B8956A',
+    marginTop: 2,
+    fontStyle: 'italic',
   },
   closeBtn: {
     width: 32,
@@ -165,77 +164,60 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeBtnText: { color: '#E8D5B8', fontSize: 16 },
-  subtitle: {
-    fontSize: 12,
-    color: '#A08060',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    fontStyle: 'italic',
-  },
   scrollView: { flex: 1 },
-  partSection: { marginBottom: 8 },
-  partHeader: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.08)',
-  },
-  partPali: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#D4A574',
-    letterSpacing: 0.3,
-  },
-  partTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#D4A574',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
+  partSection: { marginTop: 4, marginBottom: 8 },
   chapterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.04)',
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
   chapterRowActive: {
     backgroundColor: '#D4A574',
-    borderRadius: 0,
   },
-  chapterLeft: {
-    flexDirection: 'row',
+  chapterBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
     marginRight: 12,
+  },
+  chapterBadgeActive: {
+    backgroundColor: 'rgba(44,24,16,0.18)',
   },
   chapterNumber: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#B8956A',
-    width: 24,
+    color: '#D4A574',
     textAlign: 'center',
   },
-  chapterPali: {
-    fontSize: 13,
-    color: '#E8D5B8',
-    fontWeight: '500',
+  chapterTextColumn: {
     flex: 1,
-    marginLeft: 8,
   },
-  chapterTextActive: { color: '#2C1810' },
+  chapterPali: {
+    fontSize: 14,
+    color: '#F5E6D0',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  chapterTextActive: {
+    color: '#2C1810',
+    fontWeight: '700',
+  },
   chapterTranslation: {
-    fontSize: 11,
-    color: '#8A7050',
-    maxWidth: 130,
-    textAlign: 'right',
+    fontSize: 12,
+    color: '#B8956A',
     fontStyle: 'italic',
+    lineHeight: 16,
   },
-  chapterTranslationActive: { color: '#3D2218' },
+  chapterTranslationActive: {
+    color: '#3D2218',
+    fontWeight: '600',
+  },
   footer: {
     paddingHorizontal: 16,
     paddingVertical: 14,

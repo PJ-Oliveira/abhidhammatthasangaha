@@ -24,6 +24,7 @@ interface SRSItem {
   easeFactor: number;
   dueDate: string;
   lastReviewed?: string;
+  lastRating?: 'again' | 'hard' | 'good' | 'easy';
   mastered: boolean;
 }
 
@@ -31,12 +32,47 @@ type SRSState = Record<string, SRSItem>;
 
 type CardCategory = AnkiCard['category'] | 'all';
 
+interface CompactSessionCache {
+  mode: 'study' | 'exam' | 'browser' | 'export';
+  ch: number | 'all';
+  cat: CardCategory;
+  idx: number;
+  bestScore: number | null;
+  exam?: {
+    started: boolean;
+    submitted: boolean;
+    ans: Record<number, number>;
+    // Ultra-compact tuple: [questionCardId, optionCardIds[], correctIndex]
+    qs: Array<[string, string[], number]>;
+  };
+}
+
 const STORAGE_KEY = 'abhidhamma_anki_srs_v2';
+const SESSION_STORAGE_KEY = 'abhidhamma_anki_session_v1';
+
+const CARD_BY_ID: Record<string, AnkiCard> = Object.fromEntries(
+  ANKI_CARDS.map((c) => [c.id, c])
+);
+
+const loadSessionCache = (): CompactSessionCache | null => {
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
 
 export const AnkiDeck: React.FC = () => {
   const dispatch = useAppDispatch();
   const reduxUiLanguage = useAppSelector((s) => s.settings.uiLanguage);
   const layout = useLayout();
+
+  // Load saved session once on mount
+  const initialSession = useMemo(() => loadSessionCache(), []);
 
   // Local language synced with Redux UI language
   const [lang, setLang] = useState<Language>(reduxUiLanguage);
@@ -52,15 +88,21 @@ export const AnkiDeck: React.FC = () => {
     dispatch(setUiLanguage(newLang));
   };
 
-  const [mode, setMode] = useState<'study' | 'exam' | 'browser' | 'export'>('study');
+  const [mode, setMode] = useState<'study' | 'exam' | 'browser' | 'export'>(
+    initialSession?.mode || 'study'
+  );
 
   // Filters
-  const [selectedChapter, setSelectedChapter] = useState<number | 'all'>('all');
-  const [selectedCategory, setSelectedCategory] = useState<CardCategory>('all');
+  const [selectedChapter, setSelectedChapter] = useState<number | 'all'>(
+    initialSession?.ch ?? 'all'
+  );
+  const [selectedCategory, setSelectedCategory] = useState<CardCategory>(
+    initialSession?.cat ?? 'all'
+  );
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Study card state
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [currentIndex, setCurrentIndex] = useState<number>(initialSession?.idx ?? 0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
 
   // SRS state
@@ -86,15 +128,67 @@ export const AnkiDeck: React.FC = () => {
     }
   }, [srsState]);
 
-  // Exam state — stores optionCards (AnkiCard[]) so switching language mid-exam dynamically translates options!
-  const [examStarted, setExamStarted] = useState<boolean>(false);
+  // Exam state — reconstructed from ultra-compact card IDs in localStorage
+  const [bestExamScore, setBestExamScore] = useState<number | null>(
+    initialSession?.bestScore ?? null
+  );
+  const [examStarted, setExamStarted] = useState<boolean>(
+    initialSession?.exam?.started ?? false
+  );
   const [examQuestions, setExamQuestions] = useState<Array<{
     card: AnkiCard;
     optionCards: AnkiCard[];
     correctIndex: number;
-  }>>([]);
-  const [examAnswers, setExamAnswers] = useState<Record<number, number>>({});
-  const [examSubmitted, setExamSubmitted] = useState<boolean>(false);
+  }>>(() => {
+    if (initialSession?.exam?.qs && initialSession.exam.qs.length > 0) {
+      const restored = initialSession.exam.qs
+        .map(([cardId, optIds, correctIndex]) => {
+          const card = CARD_BY_ID[cardId];
+          const optionCards = optIds.map((id) => CARD_BY_ID[id]).filter(Boolean);
+          if (!card || optionCards.length === 0) return null;
+          return { card, optionCards, correctIndex };
+        })
+        .filter((item): item is { card: AnkiCard; optionCards: AnkiCard[]; correctIndex: number } => item !== null);
+      if (restored.length > 0) return restored;
+    }
+    return [];
+  });
+  const [examAnswers, setExamAnswers] = useState<Record<number, number>>(
+    initialSession?.exam?.ans ?? {}
+  );
+  const [examSubmitted, setExamSubmitted] = useState<boolean>(
+    initialSession?.exam?.submitted ?? false
+  );
+
+  // Save compact session (card index, filters, best score, active exam IDs & answers)
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const payload: CompactSessionCache = {
+          mode,
+          ch: selectedChapter,
+          cat: selectedCategory,
+          idx: currentIndex,
+          bestScore: bestExamScore,
+          exam: examStarted && examQuestions.length > 0
+            ? {
+                started: examStarted,
+                submitted: examSubmitted,
+                ans: examAnswers,
+                qs: examQuestions.map((q) => [
+                  q.card.id,
+                  q.optionCards.map((o) => o.id),
+                  q.correctIndex,
+                ]),
+              }
+            : undefined,
+        };
+        window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(payload));
+      } catch (e) {
+        console.error('Failed to save session state', e);
+      }
+    }
+  }, [mode, selectedChapter, selectedCategory, currentIndex, bestExamScore, examStarted, examSubmitted, examAnswers, examQuestions]);
 
   // Filter cards
   const filteredCards = useMemo(() => {
@@ -115,37 +209,54 @@ export const AnkiDeck: React.FC = () => {
     });
   }, [selectedChapter, selectedCategory, searchQuery, lang]);
 
-  const currentCard: AnkiCard | undefined = filteredCards[currentIndex];
+  const safeIndex = filteredCards.length > 0
+    ? Math.min(currentIndex, filteredCards.length - 1)
+    : 0;
+  const currentCard: AnkiCard | undefined = filteredCards[safeIndex];
 
-  useEffect(() => {
+  const handleSelectChapter = (ch: number | 'all') => {
+    setSelectedChapter(ch);
     setCurrentIndex(0);
     setIsFlipped(false);
-  }, [selectedChapter, selectedCategory, searchQuery]);
+  };
+
+  const handleSelectCategory = (cat: CardCategory) => {
+    setSelectedCategory(cat);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  const handleSearchChange = (text: string) => {
+    setSearchQuery(text);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
 
   const handleNextCard = useCallback(() => {
-    if (currentIndex < filteredCards.length - 1) {
-      setCurrentIndex((i) => i + 1);
+    if (safeIndex < filteredCards.length - 1) {
+      setCurrentIndex(safeIndex + 1);
       setIsFlipped(false);
     }
-  }, [currentIndex, filteredCards.length]);
+  }, [safeIndex, filteredCards.length]);
 
   const handlePrevCard = useCallback(() => {
-    if (currentIndex > 0) {
-      setCurrentIndex((i) => i - 1);
+    if (safeIndex > 0) {
+      setCurrentIndex(safeIndex - 1);
       setIsFlipped(false);
     }
-  }, [currentIndex]);
+  }, [safeIndex]);
 
-  // SM-2 Spaced Repetition Rating
+  // SM-2 Spaced Repetition Rating (ultra-compact dates & rounded floats)
   const handleRate = useCallback((rating: 'again' | 'hard' | 'good' | 'easy') => {
     if (!currentCard) return;
     const id = currentCard.id;
+    const todayStr = new Date().toISOString().slice(0, 10);
     const currentItem: SRSItem = srsState[id] || {
       id,
       interval: 0,
       reps: 0,
       easeFactor: 2.5,
-      dueDate: new Date().toISOString(),
+      dueDate: todayStr,
       mastered: false,
     };
 
@@ -192,9 +303,10 @@ export const AnkiDeck: React.FC = () => {
         id,
         interval: newInterval,
         reps: newReps,
-        easeFactor: newEase,
-        dueDate: nextDue.toISOString(),
-        lastReviewed: new Date().toISOString(),
+        easeFactor: Math.round(newEase * 100) / 100,
+        dueDate: nextDue.toISOString().slice(0, 10),
+        lastReviewed: todayStr,
+        lastRating: rating,
         mastered,
       },
     }));
@@ -202,9 +314,28 @@ export const AnkiDeck: React.FC = () => {
     // Advance to next card, or wrap around to 0 if on the last card, and always reset flip state
     setIsFlipped(false);
     if (filteredCards.length > 0) {
-      setCurrentIndex((i) => (i < filteredCards.length - 1 ? i + 1 : 0));
+      setCurrentIndex(safeIndex < filteredCards.length - 1 ? safeIndex + 1 : 0);
     }
-  }, [currentCard, srsState, filteredCards.length]);
+  }, [currentCard, srsState, filteredCards.length, safeIndex]);
+
+  const handleResetCache = () => {
+    setSrsState({});
+    setBestExamScore(null);
+    setExamStarted(false);
+    setExamQuestions([]);
+    setExamAnswers({});
+    setExamSubmitted(false);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+        window.localStorage.removeItem(SESSION_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+    }
+  };
 
   // Keyboard navigation on Web
   useEffect(() => {
@@ -292,6 +423,52 @@ export const AnkiDeck: React.FC = () => {
     return Math.round((correct / examQuestions.length) * 100);
   };
 
+  const handleSubmitExam = () => {
+    setExamSubmitted(true);
+    const score = calculateExamScore();
+    setBestExamScore((prev) => (prev === null || score > prev ? score : prev));
+
+    // Also update SRS state based on exam results so missed/correct exam items are tracked in cache
+    const todayStr = new Date().toISOString().slice(0, 10);
+    setSrsState((curr) => {
+      const next = { ...curr };
+      examQuestions.forEach((q, idx) => {
+        if (examAnswers[idx] === undefined) return;
+        const id = q.card.id;
+        const isCorrect = examAnswers[idx] === q.correctIndex;
+        const existing = next[id];
+        if (isCorrect) {
+          const reps = (existing?.reps ?? 0) + 1;
+          const interval = existing ? Math.max(1, Math.round(existing.interval * 1.5)) : 3;
+          const due = new Date();
+          due.setDate(due.getDate() + interval);
+          next[id] = {
+            id,
+            interval,
+            reps,
+            easeFactor: existing?.easeFactor ?? 2.5,
+            dueDate: due.toISOString().slice(0, 10),
+            lastReviewed: todayStr,
+            lastRating: existing?.lastRating ?? 'good',
+            mastered: existing?.mastered || reps >= 2,
+          };
+        } else {
+          next[id] = {
+            id,
+            interval: 1,
+            reps: 0,
+            easeFactor: Math.max(1.3, (existing?.easeFactor ?? 2.5) - 0.2),
+            dueDate: todayStr,
+            lastReviewed: todayStr,
+            lastRating: 'again',
+            mastered: false,
+          };
+        }
+      });
+      return next;
+    });
+  };
+
   const t = {
     pt: {
       title: 'Anki • Memorização & Simulado 100',
@@ -312,7 +489,6 @@ export const AnkiDeck: React.FC = () => {
       emptyFilter: 'Nenhum card encontrado para o filtro selecionado.',
       prevBtn: '◀ Anterior',
       nextBtn: 'Próximo ▶',
-      listenBtn: '🔊 Ouvir',
       formatLabel: 'Formato:',
       breakdownLabel: '📋 Estrutura & Classificação:',
       foundationLabel: '📖 Fundamento:',
@@ -328,6 +504,12 @@ export const AnkiDeck: React.FC = () => {
       of: 'de',
       mastery: 'Taxa de Domínio',
       reviewed: 'Revisados',
+      bestExamScoreLabel: 'Recorde Prova',
+      cacheSavedLabel: '💾 Salvo no cache',
+      resetCacheBtn: '↺ Zerar Progresso',
+      statusMastered: '✅ Dominado',
+      statusReviewed: '🔄 Revisado',
+      statusAgain: '🔴 Revisar',
       startExam: 'Iniciar Simulado Prova 100',
       examDesc: 'Simulador autêntico com questões de múltipla escolha para testar sua retenção de 0 a 100%.',
       exam10Btn: '📝 10 Questões Rápidas',
@@ -375,7 +557,6 @@ export const AnkiDeck: React.FC = () => {
       emptyFilter: 'No cards found for the selected filter.',
       prevBtn: '◀ Previous',
       nextBtn: 'Next ▶',
-      listenBtn: '🔊 Listen',
       formatLabel: 'Format:',
       breakdownLabel: '📋 Structure & Classification:',
       foundationLabel: '📖 Foundation:',
@@ -391,6 +572,12 @@ export const AnkiDeck: React.FC = () => {
       of: 'of',
       mastery: 'Mastery Rate',
       reviewed: 'Reviewed',
+      bestExamScoreLabel: 'Best Exam',
+      cacheSavedLabel: '💾 Saved in cache',
+      resetCacheBtn: '↺ Reset Progress',
+      statusMastered: '✅ Mastered',
+      statusReviewed: '🔄 Reviewed',
+      statusAgain: '🔴 Review Again',
       startExam: 'Start 100-Score Practice Exam',
       examDesc: 'Authentic exam simulation testing full conceptual, quantitative, and relational mastery.',
       exam10Btn: '📝 10 Quick Questions',
@@ -438,7 +625,6 @@ export const AnkiDeck: React.FC = () => {
       emptyFilter: 'No se encontraron tarjetas para el filtro seleccionado.',
       prevBtn: '◀ Anterior',
       nextBtn: 'Siguiente ▶',
-      listenBtn: '🔊 Escuchar',
       formatLabel: 'Formato:',
       breakdownLabel: '📋 Estructura y Clasificación:',
       foundationLabel: '📖 Fundamento:',
@@ -454,6 +640,12 @@ export const AnkiDeck: React.FC = () => {
       of: 'de',
       mastery: 'Tasa de Dominio',
       reviewed: 'Repasadas',
+      bestExamScoreLabel: 'Récord Examen',
+      cacheSavedLabel: '💾 Guardado en caché',
+      resetCacheBtn: '↺ Reiniciar Progreso',
+      statusMastered: '✅ Dominada',
+      statusReviewed: '🔄 Repasada',
+      statusAgain: '🔴 Repasar',
       startExam: 'Iniciar Simulado para Sacar 100',
       examDesc: 'Simulador riguroso diseñado para certificar que obtendrás una nota de 100.',
       exam10Btn: '📝 10 Preguntas Rápidas',
@@ -512,10 +704,47 @@ export const AnkiDeck: React.FC = () => {
     }
   };
 
-  // Stats
+  // Stats & Cache footprint calculation
   const totalReviewed = Object.keys(srsState).length;
   const totalMastered = Object.values(srsState).filter((s) => s.mastered).length;
   const masteryPercentage = Math.round((totalMastered / ANKI_CARDS.length) * 100);
+
+  const cacheBytes = useMemo(() => {
+    const srsStr = JSON.stringify(srsState);
+    const sessionOverhead = 180 + examQuestions.length * 42;
+    return srsStr.length + sessionOverhead;
+  }, [srsState, examQuestions.length]);
+  const cacheKb = (cacheBytes / 1024).toFixed(1);
+
+  const renderCardSrsBadge = (cardId: string) => {
+    const item = srsState[cardId];
+    if (!item) return null;
+    if (item.mastered) {
+      return (
+        <View style={{ backgroundColor: '#DCFCE7', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
+          <Text style={{ color: '#166534', fontSize: 12, fontWeight: 'bold' }}>
+            {t.statusMastered} ({item.interval}d)
+          </Text>
+        </View>
+      );
+    }
+    if (item.lastRating === 'again') {
+      return (
+        <View style={{ backgroundColor: '#FEE2E2', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
+          <Text style={{ color: '#991B1B', fontSize: 12, fontWeight: 'bold' }}>
+            {t.statusAgain} ({item.interval}d)
+          </Text>
+        </View>
+      );
+    }
+    return (
+      <View style={{ backgroundColor: '#E0F2FE', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
+        <Text style={{ color: '#075985', fontSize: 12, fontWeight: 'bold' }}>
+          {t.statusReviewed} ({item.interval}d)
+        </Text>
+      </View>
+    );
+  };
 
   const categories: Array<{ key: CardCategory; label: string }> = [
     { key: 'all', label: t.allCategories },
@@ -540,7 +769,7 @@ export const AnkiDeck: React.FC = () => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
         <TouchableOpacity
           style={[styles.filterChip, selectedChapter === 'all' && styles.filterChipActive]}
-          onPress={() => setSelectedChapter('all')}
+          onPress={() => handleSelectChapter('all')}
         >
           <Text style={[styles.filterChipText, selectedChapter === 'all' && styles.filterChipTextActive]}>
             {t.allChapters}
@@ -550,7 +779,7 @@ export const AnkiDeck: React.FC = () => {
           <TouchableOpacity
             key={ch}
             style={[styles.filterChip, selectedChapter === ch && styles.filterChipActive]}
-            onPress={() => setSelectedChapter(ch)}
+            onPress={() => handleSelectChapter(ch)}
           >
             <Text style={[styles.filterChipText, selectedChapter === ch && styles.filterChipTextActive]}>
               {t.chapterPrefix} {ch}
@@ -564,7 +793,7 @@ export const AnkiDeck: React.FC = () => {
           <TouchableOpacity
             key={cat.key}
             style={[styles.filterChipSecondary, selectedCategory === cat.key && styles.filterChipSecondaryActive]}
-            onPress={() => setSelectedCategory(cat.key)}
+            onPress={() => handleSelectCategory(cat.key)}
           >
             <Text style={[styles.filterChipText, selectedCategory === cat.key && styles.filterChipTextActive]}>
               {cat.label}
@@ -605,16 +834,44 @@ export const AnkiDeck: React.FC = () => {
         </View>
 
         {/* Stats */}
-        <View style={styles.statsRow}>
-          <Text style={styles.statText}>
-            Cards: <Text style={styles.statBold}>{ANKI_CARDS.length}</Text>
-          </Text>
-          <Text style={styles.statText}>
-            {t.reviewed}: <Text style={styles.statBold}>{totalReviewed}</Text>
-          </Text>
-          <Text style={styles.statText}>
-            {t.mastery}: <Text style={styles.statGold}>{masteryPercentage}%</Text> ({totalMastered})
-          </Text>
+        <View style={[styles.statsRow, { justifyContent: 'space-between', alignItems: 'center' }]}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, alignItems: 'center' }}>
+            <Text style={styles.statText}>
+              Cards: <Text style={styles.statBold}>{ANKI_CARDS.length}</Text>
+            </Text>
+            <Text style={styles.statText}>
+              {t.reviewed}: <Text style={styles.statBold}>{totalReviewed}</Text>
+            </Text>
+            <Text style={styles.statText}>
+              {t.mastery}: <Text style={styles.statGold}>{masteryPercentage}%</Text> ({totalMastered})
+            </Text>
+            {bestExamScore !== null && (
+              <Text style={styles.statText}>
+                🏆 {t.bestExamScoreLabel}: <Text style={styles.statGold}>{bestExamScore}%</Text>
+              </Text>
+            )}
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Text style={{ color: '#D8CBB5', fontSize: 11 }}>
+              {t.cacheSavedLabel} ({cacheKb} KB)
+            </Text>
+            {(totalReviewed > 0 || bestExamScore !== null || examStarted) && (
+              <TouchableOpacity
+                onPress={handleResetCache}
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.12)',
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 6,
+                }}
+              >
+                <Text style={{ color: '#FCA5A5', fontSize: 11, fontWeight: 'bold' }}>
+                  {t.resetCacheBtn}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
 
@@ -668,20 +925,20 @@ export const AnkiDeck: React.FC = () => {
               {/* Counter & Nav */}
               <View style={styles.navRow}>
                 <Text style={styles.counterText}>
-                  {t.cardProgress} {currentIndex + 1} {t.of} {filteredCards.length}
+                  {t.cardProgress} {safeIndex + 1} {t.of} {filteredCards.length}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <TouchableOpacity
-                    style={[styles.smallBtn, currentIndex === 0 && styles.smallBtnDisabled]}
+                    style={[styles.smallBtn, safeIndex === 0 && styles.smallBtnDisabled]}
                     onPress={handlePrevCard}
-                    disabled={currentIndex === 0}
+                    disabled={safeIndex === 0}
                   >
                     <Text style={styles.smallBtnText}>{t.prevBtn}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.smallBtn, currentIndex === filteredCards.length - 1 && styles.smallBtnDisabled]}
+                    style={[styles.smallBtn, safeIndex === filteredCards.length - 1 && styles.smallBtnDisabled]}
                     onPress={handleNextCard}
-                    disabled={currentIndex === filteredCards.length - 1}
+                    disabled={safeIndex === filteredCards.length - 1}
                   >
                     <Text style={styles.smallBtnText}>{t.nextBtn}</Text>
                   </TouchableOpacity>
@@ -701,8 +958,11 @@ export const AnkiDeck: React.FC = () => {
                       {currentCard.chapterName[lang]} ({currentCard.chapterName.pali})
                     </Text>
                   </View>
-                  <View style={styles.badgeSection}>
-                    <Text style={styles.badgeSectionText}>{currentCard[lang].examQuestionType}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {renderCardSrsBadge(currentCard.id)}
+                    <View style={styles.badgeSection}>
+                      <Text style={styles.badgeSectionText}>{currentCard[lang].examQuestionType}</Text>
+                    </View>
                   </View>
                 </View>
 
@@ -897,7 +1157,7 @@ export const AnkiDeck: React.FC = () => {
                     styles.submitExamBtn,
                     Object.keys(examAnswers).length === 0 && { opacity: 0.6 },
                   ]}
-                  onPress={() => setExamSubmitted(true)}
+                  onPress={handleSubmitExam}
                   disabled={Object.keys(examAnswers).length === 0}
                 >
                   <Text style={styles.submitExamBtnText}>{t.submitExam}</Text>
@@ -930,7 +1190,7 @@ export const AnkiDeck: React.FC = () => {
             style={styles.searchInput}
             placeholder={t.searchPlaceholder}
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={handleSearchChange}
           />
           <View style={{ marginTop: 12 }}>
             <Text style={{ fontSize: 13, color: '#64748B', marginBottom: 8 }}>
@@ -945,7 +1205,8 @@ export const AnkiDeck: React.FC = () => {
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
                   <Text style={styles.browserPali}>{card.paliTerm}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {renderCardSrsBadge(card.id)}
                     <Text style={styles.browserMeta}>{card.chapterName[lang]} | {card[lang].examQuestionType}</Text>
                     <Text style={styles.browserJumpBadge}>{t.studyThisCard}</Text>
                   </View>
