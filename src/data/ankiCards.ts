@@ -1,4 +1,5 @@
 // src/data/ankiCards.ts
+import { ATOMIC_CARDS, CAPSTONE_REQUIRES, CURRICULUM_ORDER } from './ankiAtomicCards';
 export type Language = 'en' | 'pt' | 'es';
 
 export interface CardContent {
@@ -26,9 +27,12 @@ export interface AnkiCard {
   pt: CardContent;
   es: CardContent;
   tags: string[];
+  /** IDs dos cartões-alicerce: este só é liberado quando todos estiverem consolidados. */
+  requires?: string[];
 }
 
-export const ANKI_CARDS: AnkiCard[] = [
+/** Cartões de síntese originais (ricos). Entram no deck único via CURRICULUM_ORDER. */
+export const CAPSTONE_CARDS: AnkiCard[] = [
   {
     "id": "ch1-01",
     "chapter": 1,
@@ -3467,3 +3471,13 @@ export const ANKI_CARDS: AnkiCard[] = [
     }
   }
 ];
+
+/**
+ * Deck ÚNICO, do mais básico ao mais composto. Cada cartão composto só é liberado
+ * quando os cartões que o formam (`requires`) estão consolidados.
+ */
+const ALL_BY_ID: Record<string, AnkiCard> = {};
+for (const c of ATOMIC_CARDS) ALL_BY_ID[c.id] = c;
+for (const c of CAPSTONE_CARDS) ALL_BY_ID[c.id] = { ...c, requires: CAPSTONE_REQUIRES[c.id] ?? [] };
+
+export const ANKI_CARDS: AnkiCard[] = CURRICULUM_ORDER.map((id) => ALL_BY_ID[id]);

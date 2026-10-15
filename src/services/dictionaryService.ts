@@ -148,6 +148,12 @@ function getCandidateStems(word: string): string[] {
 // Cache de memória global para lookups O(1)
 const lookupCache = new Map<string, DictionaryEntry | null>();
 
+// Grafias alternativas → forma canônica no dicionário
+const PALI_ALIASES: Record<string, string> = {
+  'voṭṭhapana': 'voṭṭhabbana',
+  'votthapana': 'votthabbana',
+};
+
 /**
  * Consulta uma palavra em Pāli no dicionário offline do Abhidhamma.
  * Executa correspondência exata O(1), diacrítico-flexível e morfológica.
@@ -161,6 +167,9 @@ export function lookupWord(word: string): DictionaryEntry | undefined {
   if (!clean) return undefined;
 
   const cacheKey = clean.toLowerCase();
+  const canonical = PALI_ALIASES[cacheKey] || PALI_ALIASES[normalizePali(cacheKey)];
+  if (canonical) return lookupWord(canonical);
+
   if (lookupCache.has(cacheKey)) {
     const cached = lookupCache.get(cacheKey);
     return cached ? cached : undefined;

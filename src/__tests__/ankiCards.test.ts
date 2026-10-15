@@ -1,9 +1,11 @@
 // src/__tests__/ankiCards.test.ts
-import { ANKI_CARDS } from '../data/ankiCards';
+import { ANKI_CARDS, CAPSTONE_CARDS } from '../data/ankiCards';
 
 describe('Anki Cards Rigorous Dataset Unit Tests', () => {
-  it('contains 63 comprehensive master flashcards with unique IDs', () => {
-    expect(ANKI_CARDS.length).toBe(63);
+  it('merges the 63 rich synthesis cards and the atomic cards into ONE deck with unique IDs', () => {
+    expect(CAPSTONE_CARDS.length).toBe(63);
+    expect(ANKI_CARDS.length).toBeGreaterThan(63);
+    CAPSTONE_CARDS.forEach((c) => expect(ANKI_CARDS.some((a) => a.id === c.id)).toBe(true));
     const ids = new Set(ANKI_CARDS.map((c) => c.id));
     expect(ids.size).toBe(ANKI_CARDS.length);
   });
@@ -22,12 +24,15 @@ describe('Anki Cards Rigorous Dataset Unit Tests', () => {
       (['en', 'pt', 'es'] as const).forEach((lang) => {
         expect(card[lang]).toBeDefined();
         expect(card[lang].question.trim().length).toBeGreaterThan(5);
-        expect(card[lang].answer.trim().length).toBeGreaterThan(5);
+        expect(card[lang].answer.trim().length).toBeGreaterThan(0);
         expect(Array.isArray(card[lang].breakdown)).toBe(true);
-        expect(card[lang].breakdown.length).toBeGreaterThanOrEqual(1);
-        expect(card[lang].explanation.trim().length).toBeGreaterThan(5);
-        expect(card[lang].mnemonicOrExamTip.trim().length).toBeGreaterThan(5);
         expect(card[lang].examQuestionType.trim().length).toBeGreaterThan(2);
+        // Atomic cards test one fact and carry no commentary; synthesis cards are fully annotated.
+        if (!card.id.startsWith('at-')) {
+          expect(card[lang].breakdown.length).toBeGreaterThanOrEqual(1);
+          expect(card[lang].explanation.trim().length).toBeGreaterThan(5);
+          expect(card[lang].mnemonicOrExamTip.trim().length).toBeGreaterThan(5);
+        }
       });
 
       // Canonical Pāḷi Term

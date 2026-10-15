@@ -54,6 +54,18 @@ const CARD_BY_ID: Record<string, AnkiCard> = Object.fromEntries(
   ANKI_CARDS.map((c) => [c.id, c])
 );
 
+// Nível = tamanho da maior cadeia de pré-requisitos (1 = alicerce sem pré-requisito).
+const LEVEL_BY_ID: Record<string, number> = {};
+const levelOf = (id: string): number => {
+  const cached = LEVEL_BY_ID[id];
+  if (cached !== undefined) return cached;
+  const card = CARD_BY_ID[id];
+  const lv = 1 + (card?.requires ?? []).reduce((m, r) => Math.max(m, levelOf(r)), 0);
+  LEVEL_BY_ID[id] = lv;
+  return lv;
+};
+ANKI_CARDS.forEach((card) => levelOf(card.id));
+
 const loadSessionCache = (): CompactSessionCache | null => {
   if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
     try {
@@ -66,7 +78,12 @@ const loadSessionCache = (): CompactSessionCache | null => {
   return null;
 };
 
-export const AnkiDeck: React.FC = () => {
+interface AnkiDeckProps {
+  /** Progresso SRS inicial (ex.: restaurado de outra fonte). O salvo no navegador tem prioridade. */
+  initialSrsState?: SRSState;
+}
+
+export const AnkiDeck: React.FC<AnkiDeckProps> = ({ initialSrsState }) => {
   const dispatch = useAppDispatch();
   const reduxUiLanguage = useAppSelector((s) => s.settings.uiLanguage);
   const layout = useLayout();
@@ -110,12 +127,12 @@ export const AnkiDeck: React.FC = () => {
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
       try {
         const saved = window.localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : {};
+        return saved ? JSON.parse(saved) : initialSrsState ?? {};
       } catch {
-        return {};
+        return initialSrsState ?? {};
       }
     }
-    return {};
+    return initialSrsState ?? {};
   });
 
   useEffect(() => {
@@ -145,8 +162,10 @@ export const AnkiDeck: React.FC = () => {
         .map(([cardId, optIds, correctIndex]) => {
           const card = CARD_BY_ID[cardId];
           const optionCards = optIds.map((id) => CARD_BY_ID[id]).filter(Boolean);
-          if (!card || optionCards.length === 0) return null;
-          return { card, optionCards, correctIndex };
+          const correctCardId = optIds[correctIndex];
+          const newCorrectIndex = optionCards.findIndex((c) => c.id === correctCardId);
+          if (!card || optionCards.length === 0 || newCorrectIndex === -1) return null;
+          return { card, optionCards, correctIndex: newCorrectIndex };
         })
         .filter((item): item is { card: AnkiCard; optionCards: AnkiCard[]; correctIndex: number } => item !== null);
       if (restored.length > 0) return restored;
@@ -198,13 +217,32 @@ export const AnkiDeck: React.FC = () => {
       .toLowerCase();
 
   // Filter cards for Study & Exam modes (by chapter and category only)
-  const deckCards = useMemo(() => {
+  const filteredDeck = useMemo(() => {
     return ANKI_CARDS.filter((card) => {
       if (selectedChapter !== 'all' && card.chapter !== selectedChapter) return false;
       if (selectedCategory !== 'all' && card.category !== selectedCategory) return false;
       return true;
     });
   }, [selectedChapter, selectedCategory]);
+
+  // Escada de retenção: um cartão com `requires` só é liberado quando todos os seus
+  // alicerces estão consolidados (>= 2 acertos seguidos; 'Repetir' zera as repetições).
+  const isConsolidated = (id: string): boolean => {
+    const item = srsState[id];
+    return !!item && item.reps >= 2;
+  };
+
+  // filteredDeck já está na ordem do currículo; um cartão liberado pelo atual tem
+  // sempre índice maior (depende dele), então o índice atual nunca se desloca.
+  const unlockedDeck = useMemo(
+    () => filteredDeck.filter((card) => (card.requires ?? []).every(isConsolidated)),
+    [filteredDeck, srsState]
+  );
+
+  const lockedCount = filteredDeck.length - unlockedDeck.length;
+
+  // Estudo e simulado usam só o que já foi liberado; o navegador mostra o deck inteiro.
+  const deckCards = mode === 'browser' ? filteredDeck : unlockedDeck;
 
   // Filter cards for Browser mode (includes diacritic-insensitive search across all fields)
   const browserCards = useMemo(() => {
@@ -295,9 +333,11 @@ export const AnkiDeck: React.FC = () => {
         mastered = false;
         break;
       case 'hard':
-        newInterval = Math.max(1, Math.round(currentItem.interval * 1.2));
+        // "Hard" is a struggling response — does NOT count as a successful review.
+        // reps stays the same so the card cannot consolidate via repeated "Hard" clicks.
+        newInterval = Math.max(1, Math.round(Math.max(1, currentItem.interval) * 1.2));
         newEase = Math.max(1.3, newEase - 0.15);
-        newReps += 1;
+        // newReps intentionally unchanged — only "Good" and "Easy" advance the rep counter
         break;
       case 'good':
         if (currentItem.reps === 0) newInterval = 1;
@@ -390,7 +430,8 @@ export const AnkiDeck: React.FC = () => {
 
   // Exam Generator — prioritizes same-chapter / same-category distractors for rigorous testing
   const startExam = (questionCount: number = 20) => {
-    const sourcePool = deckCards.length >= 4 ? [...deckCards] : [...ANKI_CARDS];
+    const isFullExam = questionCount >= ANKI_CARDS.length;
+    const sourcePool = (!isFullExam && deckCards.length >= 4) ? [...deckCards] : [...ANKI_CARDS];
     for (let i = sourcePool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [sourcePool[i], sourcePool[j]] = [sourcePool[j], sourcePool[i]];
@@ -398,7 +439,9 @@ export const AnkiDeck: React.FC = () => {
 
     const selected = sourcePool.slice(0, Math.min(questionCount, sourcePool.length));
     const generated = selected.map((card) => {
-      const otherCards = ANKI_CARDS.filter((c) => c.id !== card.id);
+      const otherCards = ANKI_CARDS.filter(
+        (c) => c.id !== card.id && c[lang].answer !== card[lang].answer
+      );
       const sameChapterOrCategory = otherCards.filter(
         (c) => c.chapter === card.chapter || c.category === card.category
       );
@@ -509,6 +552,7 @@ export const AnkiDeck: React.FC = () => {
       cat_philosophy: '☸️ Filosofia',
       cat_exam_traps: '⚠️ Pegadinhas de Prova',
       emptyFilter: 'Nenhum card encontrado para o filtro selecionado.',
+      allLockedInFilter: 'Todos os cards desta seção estão bloqueados no momento. Consolide os pré-requisitos dos níveis anteriores para desbloqueá-los.',
       prevBtn: '◀ Anterior',
       nextBtn: 'Próximo ▶',
       formatLabel: 'Formato:',
@@ -556,10 +600,13 @@ export const AnkiDeck: React.FC = () => {
       cardsFound: 'cards encontrados',
       studyThisCard: '🎴 Estudar Card',
       exportTitle: 'Exportar para o Aplicativo Anki Oficial',
-      exportDesc: 'Baixe o baralho completo com 63 cards formatados com HTML, termos em Pāḷi e dicas.',
+      exportDesc: `Baixe o baralho completo com ${ANKI_CARDS.length} cards estruturados em escada pedagógica, formatados com HTML, termos em Pāḷi e dicas.`,
       downloadBtn: 'Baixar Baralho Anki (.txt / TSV)',
       exportAlertTitle: 'Exportação',
       exportAlertMsg: 'Exportação concluída. Arquivo pronto para importação no Anki.',
+      lockedPrefix: '🔒',
+      lockedSuffix: 'cards bloqueados — liberados ao consolidar os pré-requisitos (2 acertos).',
+      levelLabel: 'Nível',
     },
     en: {
       title: 'Anki • Memorization & 100-Point Exam',
@@ -578,6 +625,7 @@ export const AnkiDeck: React.FC = () => {
       cat_philosophy: '☸️ Philosophy',
       cat_exam_traps: '⚠️ Exam Traps',
       emptyFilter: 'No cards found for the selected filter.',
+      allLockedInFilter: 'All cards in this section are currently locked. Consolidate prerequisites from earlier levels to unlock them.',
       prevBtn: '◀ Previous',
       nextBtn: 'Next ▶',
       formatLabel: 'Format:',
@@ -625,10 +673,13 @@ export const AnkiDeck: React.FC = () => {
       cardsFound: 'cards found',
       studyThisCard: '🎴 Study Card',
       exportTitle: 'Export to Official Anki App',
-      exportDesc: 'Download formatted deck ready for 1-click import into Anki Desktop or Mobile.',
+      exportDesc: `Download the complete deck with ${ANKI_CARDS.length} cards structured in a pedagogical ladder, formatted with HTML, Pāḷi terms, and tips.`,
       downloadBtn: 'Download Anki Deck (.txt / TSV)',
       exportAlertTitle: 'Export',
       exportAlertMsg: 'Export complete. File ready for import into Anki.',
+      lockedPrefix: '🔒',
+      lockedSuffix: 'locked cards — unlocked once prerequisites are consolidated (2 successful reviews).',
+      levelLabel: 'Level',
     },
     es: {
       title: 'Anki • Memorización y Simulado 100',
@@ -647,6 +698,7 @@ export const AnkiDeck: React.FC = () => {
       cat_philosophy: '☸️ Filosofía',
       cat_exam_traps: '⚠️ Trampas de Examen',
       emptyFilter: 'No se encontraron tarjetas para el filtro seleccionado.',
+      allLockedInFilter: 'Todas las tarjetas de esta sección están bloqueadas por el momento. Consolida los prerrequisitos de niveles anteriores para desbloquearlas.',
       prevBtn: '◀ Anterior',
       nextBtn: 'Siguiente ▶',
       formatLabel: 'Formato:',
@@ -694,10 +746,13 @@ export const AnkiDeck: React.FC = () => {
       cardsFound: 'tarjetas encontradas',
       studyThisCard: '🎴 Estudiar Tarjeta',
       exportTitle: 'Exportar a la Aplicación Anki Oficial',
-      exportDesc: 'Descarga el mazo formateado para Anki Desktop, AnkiMobile o AnkiDroid.',
+      exportDesc: `Descarga el mazo completo con ${ANKI_CARDS.length} tarjetas estructuradas en escalera pedagógica, formateadas con HTML, términos en Pāḷi y consejos.`,
       downloadBtn: 'Descargar Mazo Anki (.txt / TSV)',
       exportAlertTitle: 'Exportación',
       exportAlertMsg: 'Exportación completada. Archivo listo para importar en Anki.',
+      lockedPrefix: '🔒',
+      lockedSuffix: 'tarjetas bloqueadas — se liberan al consolidar los prerrequisitos (2 aciertos).',
+      levelLabel: 'Nivel',
     },
   }[lang];
 
@@ -730,8 +785,8 @@ export const AnkiDeck: React.FC = () => {
   };
 
   // Stats & Cache footprint calculation
-  const totalReviewed = Object.keys(srsState).length;
-  const totalMastered = Object.values(srsState).filter((s) => s.mastered).length;
+  const totalReviewed = ANKI_CARDS.filter((c) => srsState[c.id]).length;
+  const totalMastered = ANKI_CARDS.filter((c) => srsState[c.id]?.mastered).length;
   const masteryPercentage = Math.round((totalMastered / ANKI_CARDS.length) * 100);
 
   const cacheBytes = useMemo(() => {
@@ -781,7 +836,13 @@ export const AnkiDeck: React.FC = () => {
   ];
 
   const handleJumpToCardInStudy = (cardId: string) => {
-    const idx = deckCards.findIndex((c) => c.id === cardId);
+    let idx = unlockedDeck.findIndex((c) => c.id === cardId);
+    if (idx === -1) {
+      setSelectedChapter('all');
+      setSelectedCategory('all');
+      const allUnlocked = ANKI_CARDS.filter((c) => (c.requires ?? []).every(isConsolidated));
+      idx = allUnlocked.findIndex((c) => c.id === cardId);
+    }
     if (idx >= 0) {
       setCurrentIndex(idx);
       setIsFlipped(false);
@@ -941,9 +1002,17 @@ export const AnkiDeck: React.FC = () => {
         <View>
           {renderFilterRows()}
 
+          {lockedCount > 0 && (
+            <View style={styles.lockedBanner}>
+              <Text style={styles.lockedBannerText}>{t.lockedPrefix} {lockedCount} {t.lockedSuffix}</Text>
+            </View>
+          )}
+
           {deckCards.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>{t.emptyFilter}</Text>
+              <Text style={styles.emptyText}>
+                {filteredDeck.length > 0 ? t.allLockedInFilter : t.emptyFilter}
+              </Text>
             </View>
           ) : currentCard && (
             <View>
@@ -986,6 +1055,9 @@ export const AnkiDeck: React.FC = () => {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     {renderCardSrsBadge(currentCard.id)}
                     <View style={styles.badgeSection}>
+                      <Text style={styles.badgeSectionText}>{t.levelLabel} {LEVEL_BY_ID[currentCard.id] ?? 1}</Text>
+                    </View>
+                    <View style={styles.badgeSection}>
                       <Text style={styles.badgeSectionText}>{currentCard[lang].examQuestionType}</Text>
                     </View>
                   </View>
@@ -1019,19 +1091,23 @@ export const AnkiDeck: React.FC = () => {
                       </View>
                     )}
 
-                    <View style={styles.explanationBox}>
-                      <Text style={styles.explanationText}>
-                        <Text style={{ fontWeight: 'bold' }}>{t.foundationLabel} </Text>
-                        {currentCard[lang].explanation}
-                      </Text>
-                    </View>
+                    {currentCard[lang].explanation !== '' && (
+                      <View style={styles.explanationBox}>
+                        <Text style={styles.explanationText}>
+                          <Text style={{ fontWeight: 'bold' }}>{t.foundationLabel} </Text>
+                          {currentCard[lang].explanation}
+                        </Text>
+                      </View>
+                    )}
 
-                    <View style={styles.mnemonicBox}>
-                      <Text style={styles.mnemonicText}>
-                        <Text style={{ fontWeight: 'bold' }}>{t.mnemonicTip}: </Text>
-                        {currentCard[lang].mnemonicOrExamTip}
-                      </Text>
-                    </View>
+                    {currentCard[lang].mnemonicOrExamTip !== '' && (
+                      <View style={styles.mnemonicBox}>
+                        <Text style={styles.mnemonicText}>
+                          <Text style={{ fontWeight: 'bold' }}>{t.mnemonicTip}: </Text>
+                          {currentCard[lang].mnemonicOrExamTip}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 )}
 
@@ -1166,10 +1242,12 @@ export const AnkiDeck: React.FC = () => {
                         <Text style={styles.feedbackTitle}>
                           {selectedOpt === q.correctIndex ? t.correctLabel : t.incorrectLabel}
                         </Text>
-                        <Text style={styles.feedbackTip}>
-                          <Text style={{ fontWeight: 'bold' }}>{t.examTipPrefix} </Text>
-                          {q.card[lang].mnemonicOrExamTip}
-                        </Text>
+                        {q.card[lang].mnemonicOrExamTip !== '' && (
+                          <Text style={styles.feedbackTip}>
+                            <Text style={{ fontWeight: 'bold' }}>{t.examTipPrefix} </Text>
+                            {q.card[lang].mnemonicOrExamTip}
+                          </Text>
+                        )}
                       </View>
                     )}
                   </View>
@@ -1221,11 +1299,14 @@ export const AnkiDeck: React.FC = () => {
             <Text style={{ fontSize: 13, color: '#64748B', marginBottom: 8 }}>
               {browserCards.length} {t.cardsFound}
             </Text>
-            {browserCards.map((card) => (
+            {browserCards.map((card) => {
+              const unlocked = (card.requires ?? []).every(isConsolidated);
+              return (
               <TouchableOpacity
                 key={card.id}
-                style={styles.browserCard}
+                style={[styles.browserCard, !unlocked && { opacity: 0.55 }]}
                 activeOpacity={0.85}
+                disabled={!unlocked}
                 onPress={() => handleJumpToCardInStudy(card.id)}
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
@@ -1233,13 +1314,16 @@ export const AnkiDeck: React.FC = () => {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     {renderCardSrsBadge(card.id)}
                     <Text style={styles.browserMeta}>{card.chapterName[lang]} | {card[lang].examQuestionType}</Text>
-                    <Text style={styles.browserJumpBadge}>{t.studyThisCard}</Text>
+                    <Text style={styles.browserJumpBadge}>
+                      {unlocked ? t.studyThisCard : `🔒 ${t.levelLabel} ${LEVEL_BY_ID[card.id]}`}
+                    </Text>
                   </View>
                 </View>
                 <Text style={styles.browserQuestion}>{card[lang].question}</Text>
                 <Text style={styles.browserAnswer}>{card[lang].answer}</Text>
               </TouchableOpacity>
-            ))}
+              );
+            })}
           </View>
         </View>
       )}
@@ -1371,6 +1455,19 @@ const styles = StyleSheet.create({
   filterScroll: {
     gap: 6,
     paddingBottom: 4,
+  },
+  lockedBanner: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 10,
+  },
+  lockedBannerText: {
+    color: '#92400E',
+    fontSize: 13,
   },
   filterChip: {
     paddingHorizontal: 12,

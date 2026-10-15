@@ -6,6 +6,16 @@ import { configureStore } from '@reduxjs/toolkit';
 import readingReducer from '../../store/slices/readingSlice';
 import settingsReducer from '../../store/slices/settingsSlice';
 import { AnkiDeck } from '../../components/AnkiDeck/AnkiDeck';
+import { ANKI_CARDS } from '../../data/ankiCards';
+
+// Cards with no prerequisites are the only ones unlocked in a fresh session.
+const UNLOCKED_AT_START = ANKI_CARDS.filter((c) => (c.requires ?? []).length === 0).length;
+
+// Builds saved SRS progress in which the given cards count as consolidated (>= 2 successful reps).
+const consolidated = (ids: string[]) =>
+  Object.fromEntries(
+    ids.map((id) => [id, { id, interval: 6, reps: 3, easeFactor: 2.5, dueDate: '2099-01-01', mastered: true }])
+  );
 
 describe('AnkiDeck Component Integration Tests', () => {
   let store: any;
@@ -49,13 +59,15 @@ describe('AnkiDeck Component Integration Tests', () => {
   });
 
   it('flips card to reveal answer, breakdown and rating buttons, advances on rating, and shows reset cache button', () => {
+    // Consolidating the root card unlocks the four cards that depend only on it.
+    const unlocked = ANKI_CARDS.filter((c) => (c.requires ?? []).every((r) => r === 'at-t01')).length;
     const { getByText } = render(
       <Provider store={store}>
-        <AnkiDeck />
+        <AnkiDeck initialSrsState={consolidated(['at-t01'])} />
       </Provider>
     );
 
-    expect(getByText(/Card 1 de 63/i)).toBeTruthy();
+    expect(getByText(new RegExp(`Card 1 de ${unlocked}\\b`, 'i'))).toBeTruthy();
 
     const flipBtn = getByText(/Mostrar Resposta \(Espaço\)/i);
     fireEvent.press(flipBtn);
@@ -68,13 +80,13 @@ describe('AnkiDeck Component Integration Tests', () => {
 
     // Rate card Easy -> marks as mastered and advances to Card 2
     fireEvent.press(easyBtn);
-    expect(getByText(/Card 2 de 63/i)).toBeTruthy();
+    expect(getByText(new RegExp(`Card 2 de ${unlocked}\\b`, 'i'))).toBeTruthy();
 
     // Reset cache button appears after rating
     const resetBtn = getByText(/↺ Zerar Progresso/i);
     expect(resetBtn).toBeTruthy();
     fireEvent.press(resetBtn);
-    expect(getByText(/Card 1 de 63/i)).toBeTruthy();
+    expect(getByText(new RegExp(`Card 1 de ${UNLOCKED_AT_START}\\b`, 'i'))).toBeTruthy();
   });
 
   it('switches to exam mode, starts a practice exam, and dynamically translates options when switching languages mid-exam', () => {
@@ -109,18 +121,19 @@ describe('AnkiDeck Component Integration Tests', () => {
   });
 
   it('allows filtering by category and jumping from Browser mode to Study mode', () => {
+    // Philosophy foundation cards (what is citta/cetasika/...) unlock once the root card is consolidated.
     const { getByText, getAllByText } = render(
       <Provider store={store}>
-        <AnkiDeck />
+        <AnkiDeck initialSrsState={consolidated(['at-t01'])} />
       </Provider>
     );
 
     // Switch to Browser mode
     fireEvent.press(getByText(/🔍 Navegador de Cards/i));
-    expect(getByText(/63 cards encontrados/i)).toBeTruthy();
+    expect(getByText(new RegExp(`${ANKI_CARDS.length} cards encontrados`, 'i'))).toBeTruthy();
 
-    // Filter by Exam Traps
-    fireEvent.press(getByText(/⚠️ Pegadinhas de Prova/i));
+    // Filter by Philosophy (foundation cards unlocked above; Exam Traps sit higher in the ladder)
+    fireEvent.press(getByText(/☸️ Filosofia/i));
 
     // Click the first card in browser to jump to Study mode
     const studyBadges = getAllByText(/🎴 Estudar Card/i);
@@ -173,9 +186,10 @@ describe('AnkiDeck Component Integration Tests', () => {
   });
 
   it('filters cards by chapter and diacritic-insensitive search query in Browser mode without trapping Study mode in the search filter', () => {
+    // Unlock the whole ladder so Chapter 6 is fully available in Study mode.
     const { getByText, getByPlaceholderText, getAllByText } = render(
       <Provider store={store}>
-        <AnkiDeck />
+        <AnkiDeck initialSrsState={consolidated(ANKI_CARDS.map((c) => c.id))} />
       </Provider>
     );
 
