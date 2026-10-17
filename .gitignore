@@ -43,3 +43,10 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+
+# Python bytecode & local reference PDFs / saved web pages
+__pycache__/
+*.py[cod]
+Headers and Footers _ Abhidhammabr*
+BHIKHU BODHI_*.pdf
+

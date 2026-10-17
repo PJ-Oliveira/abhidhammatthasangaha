@@ -1,5 +1,5 @@
 // src/services/dictionaryService.ts
-import type { DictionaryEntry } from '../types/models';
+import type { DictionaryEntry, AbhidhammaEntryData } from '../types/models';
 import rawDictionary from '../data/paliDictionary.json';
 
 export type { DictionaryEntry };
@@ -24,12 +24,21 @@ interface IndexedDictionaryEntry extends DictionaryEntry {
   _searchKeyEs: string;
 }
 
+function getAbhidhammaSearchText(entry: DictionaryEntry, lang: 'pt' | 'en' | 'es'): string {
+  if (!entry.abhidhamma) return '';
+  if ('ontology' in entry.abhidhamma) {
+    const abhi = entry.abhidhamma as AbhidhammaEntryData;
+    return `${abhi.ontology?.[lang] || ''} ${abhi.category?.[lang] || ''} ${abhi.philosophy?.[lang] || ''}`;
+  }
+  return entry.abhidhamma[lang] || '';
+}
+
 const indexedDictionary: IndexedDictionaryEntry[] = (rawDictionary as DictionaryEntry[]).map((entry) => ({
   ...entry,
   _searchKeyPali: normalizePali(entry.pali),
-  _searchKeyEn: normalizePali(entry.meaning?.en || ''),
-  _searchKeyPt: normalizePali(entry.meaning?.pt || ''),
-  _searchKeyEs: normalizePali(entry.meaning?.es || ''),
+  _searchKeyEn: normalizePali(`${entry.meaning?.en || ''} ${getAbhidhammaSearchText(entry, 'en')}`),
+  _searchKeyPt: normalizePali(`${entry.meaning?.pt || ''} ${getAbhidhammaSearchText(entry, 'pt')}`),
+  _searchKeyEs: normalizePali(`${entry.meaning?.es || ''} ${getAbhidhammaSearchText(entry, 'es')}`),
 }));
 
 export const paliDictionary: DictionaryEntry[] = indexedDictionary;
@@ -55,7 +64,7 @@ indexedDictionary.forEach((entry) => {
 export function cleanPaliToken(text: string): string {
   if (!text) return '';
   return text
-    .replace(/^[^a-zA-ZāīūñṅṭḍṇḷṃĀĪŪÑṄṬḌṆḶṂ0-9]+|[^a-zA-ZāīūñṅṭḍṇḷṃĀĪŪÑṄṬḌṆḶṂ0-9]+$/g, '')
+    .replace(/^[^a-zA-ZāīūñṅṭḍṇḷṃĀĪŪÑṄṬḌṆḶṂ0-9-]+|[^a-zA-ZāīūñṅṭḍṇḷṃĀĪŪÑṄṬḌṆḶṂ0-9-]+$/g, '')
     .trim();
 }
 
@@ -72,6 +81,8 @@ function getCandidateStems(word: string): string[] {
   // Desinências nominais, verbais e de sandhi canônicas em Pāli
   const endings: [string, string][] = [
     // Sandhis frequentes nos tratados do Abhidhamma
+    ['mekaṃ', 'a'],
+    ['mekaṃ', ''],
     ['tīti', 'ti'],
     ['tīti', ''],
     ['ñceti', 'a'],
@@ -109,6 +120,7 @@ function getCandidateStems(word: string): string[] {
     ['esu', ''],
     ['āni', 'a'],    // Nom./acc. pl nt
     ['āni', ''],
+    ['ānī', 'a'],
     ['o', 'a'],      // Nominativo sg masc
     ['e', 'a'],      // Locativo sg
     ['ā', 'a'],      // Nominativo pl / ablativo
@@ -150,9 +162,35 @@ const lookupCache = new Map<string, DictionaryEntry | null>();
 
 // Grafias alternativas → forma canônica no dicionário
 const PALI_ALIASES: Record<string, string> = {
-  'voṭṭhapana': 'voṭṭhabbana',
-  'votthapana': 'votthabbana',
+  'voṭṭhapana': 'votthapana',
+  'voṭṭhabbana': 'votthapana',
+  'votthabbana': 'votthapana',
+  'vīriya': 'viriya',
+  'ujukatā': 'ujjukatā',
+  'kāyujukatā': 'kāyujjukatā',
+  'cittujukatā': 'cittujjukatā',
+  'sammāājīva': 'sammā-ājīva',
+  'kiriyā': 'kiriya',
 };
+
+function enrichFromBaseLemma(entry?: IndexedDictionaryEntry): DictionaryEntry | undefined {
+  if (!entry) return undefined;
+  if (entry.baseLemma) {
+    const base = exactPaliMap.get(entry.baseLemma.toLowerCase());
+    if (base) {
+      return {
+        ...base,
+        ...entry,
+        abhidhamma: entry.abhidhamma || base.abhidhamma,
+        samasa: entry.samasa || base.samasa,
+        etymology: entry.etymology || base.etymology,
+        root: entry.root || base.root,
+        seeAlso: entry.seeAlso || base.seeAlso,
+      };
+    }
+  }
+  return entry;
+}
 
 /**
  * Consulta uma palavra em Pāli no dicionário offline do Abhidhamma.
@@ -168,16 +206,17 @@ export function lookupWord(word: string): DictionaryEntry | undefined {
 
   const cacheKey = clean.toLowerCase();
   const canonical = PALI_ALIASES[cacheKey] || PALI_ALIASES[normalizePali(cacheKey)];
-  if (canonical) return lookupWord(canonical);
+  if (canonical && canonical !== cacheKey) return lookupWord(canonical);
 
   if (lookupCache.has(cacheKey)) {
     const cached = lookupCache.get(cacheKey);
     return cached ? cached : undefined;
   }
 
-  const resolve = (entry?: DictionaryEntry) => {
-    lookupCache.set(cacheKey, entry || null);
-    return entry;
+  const resolve = (entry?: IndexedDictionaryEntry) => {
+    const enriched = enrichFromBaseLemma(entry);
+    lookupCache.set(cacheKey, enriched || null);
+    return enriched;
   };
 
   // Fase 1: Correspondência exata insensível a maiúsculas (O(1))
@@ -209,7 +248,7 @@ export function lookupWord(word: string): DictionaryEntry | undefined {
 
 /**
  * Pesquisa no dicionário em Pāli e em todas as traduções (EN, PT, ES).
- * Resultados ordenados por relevância e limitados aos 50 melhores.
+ * Prioriza verbetes canônicos Tier-1 do Abhidhamma e lemas base.
  */
 export function searchDictionary(query: string): DictionaryEntry[] {
   if (!query) return [];
@@ -226,14 +265,20 @@ export function searchDictionary(query: string): DictionaryEntry[] {
     );
   });
 
-  // Relevância: correspondência exata > prefixo Pāli > substring Pāli > significado
+  // Relevância: correspondência exata Pāli > prefixo Pāli > substring Pāli > significado direto > filosofia Abhidhamma
   const sorted = matched.sort((a, b) => {
     const score = (entry: IndexedDictionaryEntry): number => {
       const pNorm = entry._searchKeyPali;
-      if (pNorm === normQuery) return 100;
-      if (pNorm.startsWith(normQuery)) return 80;
-      if (pNorm.includes(normQuery)) return 60;
-      return 20;
+      const tierBonus = entry.tier === 1 ? (entry.baseLemma ? 3 : 8) : 0;
+      if (pNorm === normQuery) return 100 + tierBonus;
+      if (pNorm.startsWith(normQuery)) return 80 + tierBonus;
+      if (pNorm.includes(normQuery)) return 60 + tierBonus;
+      const directMeaning =
+        normalizePali(entry.meaning?.en || '').includes(normQuery) ||
+        normalizePali(entry.meaning?.pt || '').includes(normQuery) ||
+        normalizePali(entry.meaning?.es || '').includes(normQuery);
+      if (directMeaning) return 40 + tierBonus;
+      return 15 + tierBonus;
     };
     return score(b) - score(a);
   });

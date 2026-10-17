@@ -63,4 +63,37 @@ describe('DictionaryPanel Component — Real Offline Pāli Lexicon Integration (
     expect(nibbanaEntry).toBeDefined();
     expect(getByText(nibbanaEntry!.meaning.en)).toBeTruthy();
   });
+
+  it('renders Samāsa decomposition, Viggaha, Lakkhaṇādi-catukka, and CMA references in the selected UI language', () => {
+    const store = configureStore({
+      reducer: { reading: readingReducer, settings: settingsReducer },
+      preloadedState: {
+        settings: { fontSize: 16, theme: 'light' as const, uiLanguage: 'pt' as const },
+      },
+    });
+    const { getAllByText } = render(
+      <Provider store={store}>
+        <DictionaryPanel />
+      </Provider>
+    );
+
+    act(() => {
+      store.dispatch(setDictionaryWord('somanassasahagata'));
+    });
+
+    // Verifies Samāsa pedagogical breakdown and Viggaha in Portuguese
+    expect(getAllByText(/Decomposição Pedagógica de Composto/i).length).toBeGreaterThan(0);
+    expect(getAllByText(/somanassena saha gataṃ/i).length).toBeGreaterThan(0);
+    expect(getAllByText(/Referência CMA/i).length).toBeGreaterThan(0);
+
+    // Verifies 4-fold Lakkhaṇādi-catukka on Paramattha Dhamma 'phassa'
+    act(() => {
+      store.dispatch(setDictionaryWord('phassa'));
+    });
+    expect(getAllByText(/1\. Lakkhaṇa/i).length).toBeGreaterThan(0);
+    expect(getAllByText(/2\. Rasa/i).length).toBeGreaterThan(0);
+    expect(getAllByText(/3\. Paccupaṭṭhāna/i).length).toBeGreaterThan(0);
+    expect(getAllByText(/4\. Padaṭṭhāna/i).length).toBeGreaterThan(0);
+  });
 });
+

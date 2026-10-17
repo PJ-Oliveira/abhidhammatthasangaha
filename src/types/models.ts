@@ -27,10 +27,54 @@ export interface SettingsState {
   uiLanguage: UiLanguage;
 }
 
+export interface TriLingual {
+  en: string;
+  pt: string;
+  es: string;
+}
+
+export interface SamasaPart {
+  part: string;
+  gloss: TriLingual;
+  grammar?: TriLingual;
+}
+
+export interface SamasaAnalysis {
+  type: TriLingual;
+  viggaha?: string;
+  literal: TriLingual;
+  parts: SamasaPart[];
+}
+
+export interface LakkhanaCatukka {
+  lakkhana: TriLingual;
+  rasa: TriLingual;
+  paccupatthana: TriLingual;
+  padatthana: TriLingual;
+}
+
+export interface AbhidhammaEntryData {
+  ontology: TriLingual;
+  category: TriLingual;
+  lakkhanaCatukka?: LakkhanaCatukka;
+  philosophy: TriLingual;
+  bodhiRef: string;
+}
+
 export interface DictionaryEntry {
   pali: string;
+  baseLemma?: string;
   meaning: Record<Exclude<Language, 'pali'>, string>;
   grammar?: string;
+  grammarLocalized?: TriLingual;
   root?: string;
+  etymology?: TriLingual;
+  samasa?: SamasaAnalysis;
+  abhidhamma?: TriLingual | AbhidhammaEntryData;
+  decomposition?: { parts: string[]; analysis: TriLingual };
   examples?: string[];
+  tier?: 1 | 2 | 3;
+  seeAlso?: string[];
+  source?: string;
 }
+

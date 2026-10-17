@@ -12,11 +12,18 @@ import { useLayout } from '../../theme/layout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setDictionaryWord } from '../../store/slices/readingSlice';
 import { lookupWord, searchDictionary, cleanPaliToken } from '../../services/dictionaryService';
+import type { DictionaryEntry, AbhidhammaEntryData } from '../../types/models';
 import { t } from '../../i18n';
 
 interface TermBottomSheetProps {
   onOpenFullDictionary?: (word: string) => void;
   hidden?: boolean;
+}
+
+function isStructuredAbhidhamma(
+  abhi: DictionaryEntry['abhidhamma']
+): abhi is AbhidhammaEntryData {
+  return Boolean(abhi && typeof abhi === 'object' && 'ontology' in abhi);
 }
 
 export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
@@ -28,7 +35,7 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
   const dictionaryWord = useAppSelector((s) => s.reading.dictionaryWord);
   const languages = useAppSelector((s) => s.reading.languages);
   const uiLanguage = useAppSelector((s) => s.settings.uiLanguage);
-  const translationLang =
+  const translationLang: 'pt' | 'en' | 'es' =
     uiLanguage ||
     (languages.includes('pt')
       ? 'pt'
@@ -43,7 +50,6 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
     setIsExpanded(false);
   };
 
-  // No modo split (tablet, desktop), o dicionário já está aberto ao lado na tela.
   if (layout.isSplit || hidden || !dictionaryWord) {
     return null;
   }
@@ -60,8 +66,13 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
   };
 
   const sheetHeight = isExpanded
-    ? Math.min(layout.height * 0.68, 560)
-    : Math.min(layout.height * 0.32, 260);
+    ? Math.min(layout.height * 0.78, 620)
+    : Math.min(layout.height * 0.42, 340);
+
+  const localizedGrammar =
+    entry?.grammarLocalized?.[translationLang] || entry?.grammar;
+  const structuredAbhi =
+    entry && isStructuredAbhidhamma(entry.abhidhamma) ? entry.abhidhamma : null;
 
   return (
     <Modal
@@ -71,25 +82,23 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
       onRequestClose={close}
     >
       <View style={styles.overlay}>
-        {/* Backdrop suave que fecha ao tocar fora */}
         <TouchableOpacity
           style={styles.backdrop}
           activeOpacity={1}
           onPress={close}
         />
 
-        {/* Card deslizante dinâmico e responsivo */}
         <View
           style={[
             styles.sheet,
             {
               height: sheetHeight,
-              maxHeight: layout.height * 0.85,
+              maxHeight: layout.height * 0.88,
               paddingHorizontal: layout.width < 380 ? 14 : 20,
             },
           ]}
         >
-          {/* Alça visual de toque (Pill handle) */}
+          {/* Pill handle */}
           <View style={styles.handleContainer}>
             <TouchableOpacity
               style={styles.handleBar}
@@ -99,16 +108,16 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
             />
           </View>
 
-          {/* Cabeçalho do Verbete */}
+          {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerInfo}>
               <View style={styles.titleRow}>
                 <Text style={styles.paliTitle} numberOfLines={1}>
                   {entry?.pali || cleanWord}
                 </Text>
-                {entry?.grammar ? (
+                {localizedGrammar ? (
                   <View style={styles.grammarBadge}>
-                    <Text style={styles.grammarBadgeText}>{entry.grammar}</Text>
+                    <Text style={styles.grammarBadgeText}>{localizedGrammar}</Text>
                   </View>
                 ) : null}
               </View>
@@ -119,7 +128,6 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
               ) : null}
             </View>
 
-            {/* Ações rápidas superiores: Expandir/Recolher e Fechar */}
             <View style={styles.headerActions}>
               <TouchableOpacity
                 style={styles.expandBtn}
@@ -142,7 +150,7 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
             </View>
           </View>
 
-          {/* Corpo da Definição */}
+          {/* Definition Body */}
           <ScrollView
             style={styles.definitionScroll}
             contentContainerStyle={styles.definitionContent}
@@ -150,13 +158,87 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
           >
             {entry ? (
               <>
+                {structuredAbhi?.ontology?.[translationLang] ? (
+                  <View style={styles.ontologyPill}>
+                    <Text style={styles.ontologyPillText}>
+                      ☸ {structuredAbhi.ontology[translationLang]}
+                    </Text>
+                  </View>
+                ) : null}
+
                 <Text style={styles.meaningText}>
                   {entry.meaning[translationLang] || entry.meaning.en}
                 </Text>
 
-                {/* Se expandido, mostra traduções alternativas caso existam */}
+                {/* Samāsa summary */}
+                {entry.samasa ? (
+                  <View style={styles.samasaCompactBox}>
+                    <Text style={styles.samasaCompactTitle}>
+                      🧩 {entry.samasa.type?.[translationLang]}
+                    </Text>
+                    {entry.samasa.viggaha ? (
+                      <Text style={styles.viggahaCompactText}>
+                        {entry.samasa.viggaha}
+                      </Text>
+                    ) : null}
+                    {entry.samasa.parts && entry.samasa.parts.length > 0 ? (
+                      <View style={styles.samasaPartsRow}>
+                        {entry.samasa.parts.map((p, idx) => (
+                          <TouchableOpacity
+                            key={`${p.part}-${idx}`}
+                            style={styles.samasaPartChip}
+                            onPress={() => dispatch(setDictionaryWord(p.part))}
+                          >
+                            <Text style={styles.samasaPartChipText}>
+                              {p.part}: {p.gloss?.[translationLang] || p.gloss?.en}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    ) : null}
+                  </View>
+                ) : null}
+
+                {/* Expanded scholarly details & alternate translations */}
                 {isExpanded && (
                   <View style={styles.expandedDetails}>
+                    {structuredAbhi?.lakkhanaCatukka ? (
+                      <View style={styles.catukkaBox}>
+                        <Text style={styles.catukkaHeader}>
+                          {t('dict.lakkhanaTitle', translationLang)}
+                        </Text>
+                        <Text style={styles.catukkaItem}>
+                          • {t('dict.lakkhana', translationLang)}:{' '}
+                          {structuredAbhi.lakkhanaCatukka.lakkhana[translationLang]}
+                        </Text>
+                        <Text style={styles.catukkaItem}>
+                          • {t('dict.rasa', translationLang)}:{' '}
+                          {structuredAbhi.lakkhanaCatukka.rasa[translationLang]}
+                        </Text>
+                        <Text style={styles.catukkaItem}>
+                          • {t('dict.paccupatthana', translationLang)}:{' '}
+                          {structuredAbhi.lakkhanaCatukka.paccupatthana[translationLang]}
+                        </Text>
+                        <Text style={styles.catukkaItem}>
+                          • {t('dict.padatthana', translationLang)}:{' '}
+                          {structuredAbhi.lakkhanaCatukka.padatthana[translationLang]}
+                        </Text>
+                      </View>
+                    ) : null}
+
+                    {structuredAbhi?.philosophy?.[translationLang] ? (
+                      <View style={styles.philosophyCompactBox}>
+                        <Text style={styles.philosophyCompactText}>
+                          {structuredAbhi.philosophy[translationLang]}
+                        </Text>
+                        {structuredAbhi.bodhiRef ? (
+                          <Text style={styles.bodhiRefCompact}>
+                            📖 {structuredAbhi.bodhiRef}
+                          </Text>
+                        ) : null}
+                      </View>
+                    ) : null}
+
                     {translationLang !== 'pt' && entry.meaning.pt && (
                       <View style={styles.altLangRow}>
                         <Text style={styles.altLangLabel}>PT:</Text>
@@ -185,7 +267,7 @@ export const TermBottomSheet: React.FC<TermBottomSheetProps> = ({
             )}
           </ScrollView>
 
-          {/* Rodapé com botão para o dicionário completo */}
+          {/* Footer */}
           <View style={styles.footer}>
             <TouchableOpacity
               style={styles.fullDictBtn}
@@ -315,17 +397,102 @@ const styles = StyleSheet.create({
   definitionContent: {
     paddingVertical: 4,
   },
+  ontologyPill: {
+    backgroundColor: '#EFE6D5',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  ontologyPillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#5C3A21',
+  },
   meaningText: {
     fontSize: 15,
     color: '#2C2219',
     lineHeight: 22,
+  },
+  samasaCompactBox: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#F8F2E4',
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: '#E2D3B8',
+  },
+  samasaCompactTitle: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#5C3A21',
+  },
+  viggahaCompactText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    color: '#4A3525',
+    marginTop: 2,
+  },
+  samasaPartsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 5,
+  },
+  samasaPartChip: {
+    backgroundColor: '#FFFDF8',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#DFCFAE',
+  },
+  samasaPartChipText: {
+    fontSize: 11.5,
+    color: '#3B2B1E',
   },
   expandedDetails: {
     marginTop: 12,
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#F4ECE0',
-    gap: 6,
+    gap: 8,
+  },
+  catukkaBox: {
+    backgroundColor: '#F6F0E4',
+    padding: 9,
+    borderRadius: 7,
+    gap: 4,
+  },
+  catukkaHeader: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#5C3A21',
+    marginBottom: 2,
+  },
+  catukkaItem: {
+    fontSize: 12,
+    color: '#2F241B',
+    lineHeight: 17.5,
+  },
+  philosophyCompactBox: {
+    backgroundColor: '#F4EFE6',
+    padding: 9,
+    borderRadius: 7,
+    borderLeftWidth: 3,
+    borderLeftColor: '#8B5A2B',
+  },
+  philosophyCompactText: {
+    fontSize: 12.5,
+    color: '#2D231A',
+    lineHeight: 18,
+  },
+  bodhiRefCompact: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#6E553C',
+    marginTop: 4,
   },
   altLangRow: {
     flexDirection: 'row',
